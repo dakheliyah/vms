@@ -29,7 +29,16 @@ export const mockFamilyMembers: FamilyMember[] = [
     venue: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
     seat: 'A-101',
     gate: 'Gate 1',
-    scanStatus: 'SCANNED'
+    scanStatus: 'SCANNED',
+    zone: 'CMZ',
+    specialPassRequest: 'Rahat',
+    accommodation: {
+      type: 'Standard',
+      roomNumber: '101',
+      building: 'Block A',
+      checkIn: '2023-11-15',
+      checkOut: '2023-11-20'
+    }
   },
   {
     id: '30429862',
@@ -41,7 +50,16 @@ export const mockFamilyMembers: FamilyMember[] = [
     venue: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
     seat: 'A-102',
     gate: 'Gate 1',
-    scanStatus: 'NOT_SCANNED'
+    scanStatus: 'NOT_SCANNED',
+    zone: 'MCZ',
+    specialPassRequest: 'Non Critical Rahat',
+    accommodation: {
+      type: 'Deluxe',
+      roomNumber: '201',
+      building: 'Block B',
+      checkIn: '2023-11-15',
+      checkOut: '2023-11-20'
+    }
   },
   {
     id: '30429861',
@@ -53,7 +71,14 @@ export const mockFamilyMembers: FamilyMember[] = [
     venue: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
     seat: 'A-103',
     gate: 'Gate 1',
-    scanStatus: 'NOT_SCANNED'
+    scanStatus: 'NOT_SCANNED',
+    accommodation: {
+      type: 'Family',
+      roomNumber: '301',
+      building: 'Block C',
+      checkIn: '2023-11-15',
+      checkOut: '2023-11-20'
+    }
   },
   {
     id: '30429860',
@@ -65,6 +90,13 @@ export const mockFamilyMembers: FamilyMember[] = [
     venue: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
     seat: 'A-104',
     gate: 'Gate 1',
-    scanStatus: 'NOT_SCANNED'
+    scanStatus: 'NOT_SCANNED',
+    accommodation: {
+      type: 'Family',
+      roomNumber: '301',
+      building: 'Block C',
+      checkIn: '2023-11-15',
+      checkOut: '2023-11-20'
+    }
   }
 ];

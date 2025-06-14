@@ -1,5 +1,13 @@
 // Types for the VMS Pass Allocation System
 
+export interface Accommodation {
+  type: string;
+  roomNumber: string;
+  building: string;
+  checkIn: string;
+  checkOut: string;
+}
+
 export interface FamilyMember {
   id: string;
   serialNumber: number;
@@ -11,6 +19,9 @@ export interface FamilyMember {
   seat?: string;
   gate?: string;
   scanStatus?: 'SCANNED' | 'NOT_SCANNED';
+  zone?: 'CMZ' | 'MCZ';
+  specialPassRequest?: 'Rahat' | 'Non Critical Rahat' | 'Mum with Kids';
+  accommodation?: Accommodation;
 }
 
 export interface PassRequest {
@@ -28,6 +39,15 @@ export interface User {
   familyId: string;
   relayCenter: string;
   location: string;
+  zone?: 'CMZ' | 'MCZ'; // Added zone
+  specialPassRequest?: 'Rahat' | 'Non Critical Rahat' | 'Mum with Kids'; // Added specialPassRequest
+  accommodation?: {
+    type: string;
+    roomNumber: string;
+    building: string;
+    checkIn: string;
+    checkOut: string;
+  };
 }
 
 export interface RelayCenter {

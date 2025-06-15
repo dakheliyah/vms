@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button'; // Added Button import
 import DashboardHeader from '@/components/DashboardHeader';
 import NavigationTabs from '@/components/NavigationTabs';
-import FamilyMembersTable from '@/components/FamilyMembersTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
 

@@ -3,11 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation'; // To get current path
 
-interface NavigationTabsProps {
-  // No props needed for now, as paths are fixed
-}
-
-export default function NavigationTabs({}: NavigationTabsProps) {
+export default function NavigationTabs() {
   const pathname = usePathname();
 
   const tabs = [

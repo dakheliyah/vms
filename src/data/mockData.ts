@@ -3,7 +3,7 @@ import { FamilyMember, User, RelayCenter } from '@/types';
 // Mock user data
 export const mockUser: User = {
   its_id: '30429860',
-  full_name: 'Fatema bai Nooruddin bhai Nagarwala',
+  fullname: 'Fatema bai Nooruddin bhai Nagarwala',
   familyId: 'FAM001',
   relayCenter: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
   location: 'Ashara Mubaraka 1447H'
@@ -22,7 +22,7 @@ export const mockFamilyMembers: FamilyMember[] = [
   {
     id: '28336149',
     serialNumber: 1,
-    fullName: 'Shaikh Husain bhai Mulla Dilawar bhai Nagarwala',
+    fullname: 'Shaikh Husain bhai Mulla Dilawar bhai Nagarwala',
     registrationStatus: 'REGISTERED',
     passStatus: 'ALLOCATED',
     dataStatus: 'VERIFIED',
@@ -43,7 +43,7 @@ export const mockFamilyMembers: FamilyMember[] = [
   {
     id: '30429862',
     serialNumber: 2,
-    fullName: 'Nafisa bai Shaikh Husain bhai Nagarwala',
+    fullname: 'Nafisa bai Shaikh Husain bhai Nagarwala',
     registrationStatus: 'REGISTERED',
     passStatus: 'ALLOCATED',
     dataStatus: 'VERIFIED',
@@ -64,7 +64,7 @@ export const mockFamilyMembers: FamilyMember[] = [
   {
     id: '30429861',
     serialNumber: 3,
-    fullName: 'Nooruddin bhai Shaikh Husain bhai Nagarwala',
+    fullname: 'Nooruddin bhai Shaikh Husain bhai Nagarwala',
     registrationStatus: 'REGISTERED',
     passStatus: 'ALLOCATED',
     dataStatus: 'VERIFIED',
@@ -83,7 +83,7 @@ export const mockFamilyMembers: FamilyMember[] = [
   {
     id: '30429860',
     serialNumber: 4,
-    fullName: 'Fatema bai Nooruddin bhai Nagarwala',
+    fullname: 'Fatema bai Nooruddin bhai Nagarwala',
     registrationStatus: 'REGISTERED',
     passStatus: 'ALLOCATED',
     dataStatus: 'VERIFIED',

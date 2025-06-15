@@ -64,7 +64,7 @@ export default function DashboardPage() {
           const transformedFamilyMembers: FamilyMember[] = familyResult.data.map((apiMember: any) => ({
             id: apiMember.its_id.toString(),
             serialNumber: apiMember.its_id,
-            fullName: apiMember.fullname,
+            fullname: apiMember.fullname,
             registrationStatus: 'PENDING',
             passStatus: 'PENDING',
             dataStatus: 'PENDING',

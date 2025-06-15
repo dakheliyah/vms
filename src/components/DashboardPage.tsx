@@ -104,8 +104,8 @@ export default function DashboardPage() {
   };
 
   const handleUpdateMemberDetails = (memberId: string, details: Partial<FamilyMember>) => {
-    setFamilyMembers(prevMembers => 
-      prevMembers.map(member => 
+    setFamilyMembers(prevMembers =>
+      prevMembers.map(member =>
         member.id === memberId ? { ...member, ...details } : member
       )
     );
@@ -113,7 +113,18 @@ export default function DashboardPage() {
     if (selectedMembers.includes(memberId)) {
       // This might involve re-fetching or just relying on the state update to re-render PassStatusSection
       // For now, the state update of familyMembers should trigger a re-render.
-    }
+    };
+  }
+
+  const handleSaveChanges = async (memberId: string, zone: string | undefined, specialPassRequest: string | undefined) => {
+    // Simulate API call
+    console.log(`Saving changes for member ${memberId}: Zone - ${zone}, Pass - ${specialPassRequest}`);
+    // Here you would typically make a POST/PUT request to your backend API
+    // For example: await fetch(`/api/members/${memberId}/update`, { method: 'POST', body: JSON.stringify({ zone, specialPassRequest }) });
+    // Add error handling and success feedback as needed
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    console.log(`Changes saved for member ${memberId}`);
+    // Optionally, refetch data or update local state if the API call modifies data that needs to be reflected immediately
   };
 
 
@@ -126,7 +137,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-secondary-cream/20 to-white">
       {/* Header */}
       <DashboardHeader user={currentUser} />
-      
+
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 space-y-6">
 
@@ -134,26 +145,24 @@ export default function DashboardPage() {
         <NavigationTabs />
 
         {/* Family Members Section */}
-      <Card className="border-primary-green/20">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-primary-green flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              List of group member(s)
-            </CardTitle>
-          </div>
-            <p className="text-sm text-gray-600 mt-2">
-              <span dangerouslySetInnerHTML={{ __html: 'To get the <span class="font-semibold text-red-600">Allocation Status</span>, Click on radio button next to your name.' }} />
-            </p>
+        <Card className="border-primary-green/20">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-primary-green flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                List of family member(s)
+              </CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="pt-4">
-            <FamilyMembersTable 
+          <CardContent className="pt-2">
+            <FamilyMembersTable
               members={familyMembers}
               selectedMembers={selectedMembers}
               onMemberSelection={handleMemberSelection}
               onSelectAll={handleSelectAll}
               selectionMode={'radio'}
-              // onUpdateMemberDetails is removed from here as editing is on PassDetailsPage
+              onUpdateMemberDetails={handleUpdateMemberDetails} // Added to enable editing features
+              onSaveChanges={handleSaveChanges} // Added to enable the update button
             />
           </CardContent>
         </Card>

@@ -41,7 +41,7 @@ export default function PassDetailsPage() {
           const transformedFamilyMembers: FamilyMember[] = familyData.data.map((apiMember: any) => ({
             id: apiMember.its_id.toString(),
             serialNumber: apiMember.its_id,
-            fullName: apiMember.full_name,
+            fullname: apiMember.fullname,
             registrationStatus: 'PENDING', // Placeholder
             passStatus: 'PENDING', // Placeholder
             dataStatus: 'PENDING', // Placeholder

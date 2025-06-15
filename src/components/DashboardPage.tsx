@@ -37,7 +37,7 @@ export default function DashboardPage() {
           const apiUser = userResult.data;
           const user: User = {
             its_id: apiUser.its_id.toString(),
-            full_name: apiUser.full_name,
+            fullname: apiUser.fullname,
             familyId: apiUser.hof_its_id?.toString() || '',
             relayCenter: '', // Placeholder
             location: apiUser.country,
@@ -64,7 +64,7 @@ export default function DashboardPage() {
           const transformedFamilyMembers: FamilyMember[] = familyResult.data.map((apiMember: any) => ({
             id: apiMember.its_id.toString(),
             serialNumber: apiMember.its_id,
-            fullName: apiMember.full_name,
+            fullName: apiMember.fullname,
             registrationStatus: 'PENDING',
             passStatus: 'PENDING',
             dataStatus: 'PENDING',

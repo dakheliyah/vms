@@ -11,7 +11,7 @@ export interface Accommodation {
 export interface FamilyMember {
   id: string;
   serialNumber: number;
-  fullName: string;
+  fullname: string;
   registrationStatus: 'REGISTERED' | 'PENDING' | 'REJECTED';
   passStatus: 'ALLOCATED' | 'PENDING' | 'CANCELLED';
   dataStatus: 'VERIFIED' | 'PENDING' | 'INCOMPLETE';
@@ -35,7 +35,7 @@ export interface PassRequest {
 
 export interface User {
   its_id: string;
-  full_name: string;
+  fullname: string;
   familyId: string;
   relayCenter: string;
   location: string;

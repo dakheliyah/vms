@@ -99,7 +99,7 @@ export default function FamilyMembersTable({
               
               {/* Full Name */}
               <div className="col-span-4 font-medium text-gray-900"> {/* Increased span */}
-                <div>{member.fullName}</div>
+                <div>{member.fullname}</div>
               </div>
 
               {/* Zone and Special Pass Request - Editable if onUpdateMemberDetails is provided */}

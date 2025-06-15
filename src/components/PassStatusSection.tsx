@@ -129,7 +129,7 @@ export default function PassStatusSection({ member, onUpdateMember }: PassStatus
             <div className="bg-white">
               <div className="grid grid-cols-2 gap-4 p-3 text-sm">
                 <div className="text-gray-700">
-                  RELAY CENTRE - BANGALORE - BUJHANI MOHALLA
+                  RELAY CENTRE - COLOMBO
                 </div>
                 <div className="text-gray-700">{member.zone || '-'}</div>
               </div>

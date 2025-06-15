@@ -34,11 +34,12 @@ export interface PassRequest {
 }
 
 export interface User {
-  id: string;
-  name: string;
+  its_id: string;
+  full_name: string;
   familyId: string;
   relayCenter: string;
   location: string;
+  country?: string;
   zone?: 'CMZ' | 'MCZ'; // Added zone
   specialPassRequest?: 'Rahat' | 'Non Critical Rahat' | 'Mum with Kids'; // Added specialPassRequest
   accommodation?: {

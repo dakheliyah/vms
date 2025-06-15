@@ -2,8 +2,8 @@ import { FamilyMember, User, RelayCenter } from '@/types';
 
 // Mock user data
 export const mockUser: User = {
-  id: '30429860',
-  name: 'Fatema bai Nooruddin bhai Nagarwala',
+  its_id: '30429860',
+  full_name: 'Fatema bai Nooruddin bhai Nagarwala',
   familyId: 'FAM001',
   relayCenter: 'RELAY CENTRE - BANGALORE - BUJHANI MOHALLA',
   location: 'Ashara Mubaraka 1447H'

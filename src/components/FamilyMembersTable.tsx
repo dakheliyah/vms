@@ -12,8 +12,7 @@ interface FamilyMembersTableProps {
   onMemberSelection: (memberId: string, isSelected: boolean) => void;
   onSelectAll: (isSelected: boolean) => void;
   selectionMode: 'radio' | 'checkbox';
-  bulkEditMode?: boolean; // Added for bulk edit mode
-  onUpdateMemberDetails: (memberId: string, details: Partial<Pick<FamilyMember, 'zone' | 'specialPassRequest'>>) => void; // Added for updating details
+  onUpdateMemberDetails?: (memberId: string, details: Partial<Pick<FamilyMember, 'zone' | 'specialPassRequest'>>) => void; // Made optional and kept for updating details
 }
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Added for Select component
@@ -24,7 +23,6 @@ export default function FamilyMembersTable({
   onMemberSelection, 
   onSelectAll, 
   selectionMode, 
-  bulkEditMode,
   onUpdateMemberDetails
 }: FamilyMembersTableProps) {
   const isRadioAndSelected = selectionMode === 'radio' && selectedMembers.length > 0;
@@ -71,12 +69,9 @@ export default function FamilyMembersTable({
       {/* TODO: Adjust column spans if necessary for new columns */} 
       <div className="bg-tertiary-gold text-white">
         <div className="grid grid-cols-12 gap-2 p-3 text-sm font-medium text-primary">
-          <div className="col-span-1 flex items-center"></div> {/* Checkbox/Radio */} 
           <div className="col-span-1">ITS No</div>
-          <div className="col-span-3">Full Name</div> {/* Increased span */}
-          <div className="col-span-2">Registration Status</div>
-          <div className="col-span-2">Pass Status</div>
-          <div className="col-span-1">Zone</div> {/* Adjusted span */}
+          <div className="col-span-4">Full Name</div> {/* Increased span */}
+          <div className="col-span-2">Zone</div> {/* Adjusted span */}
           <div className="col-span-2">Special Pass</div> {/* Adjusted span */}
         </div>
       </div>
@@ -96,16 +91,6 @@ export default function FamilyMembersTable({
                 isSelected ? 'bg-primary-green/5 border-primary-green/20' : ''
               }`}
             >
-              {/* Selection Radio */}
-              <div className="col-span-1 flex items-center">
-                <input
-                type={selectionMode}
-                name={selectionMode === 'radio' ? 'selectedMember' : `member-${member.id}`}
-                checked={isSelected}
-                onChange={() => handleMemberSelect(member.id)}
-                className={`h-5 w-5 border-2 ${selectionMode === 'radio' ? 'rounded-full' : ''} border-gray-300 text-primary-green focus:ring-2 focus:ring-primary-green focus:ring-offset-2`}
-              />
-              </div>
               
               {/* Serial Number */}
               <div className="col-span-1 font-medium text-gray-700">
@@ -113,46 +98,20 @@ export default function FamilyMembersTable({
               </div>
               
               {/* Full Name */}
-              <div className="col-span-3 font-medium text-gray-900"> {/* Increased span */}
+              <div className="col-span-4 font-medium text-gray-900"> {/* Increased span */}
                 <div>{member.fullName}</div>
               </div>
-              
-              {/* Registration Status */}
-              <div className="col-span-2"> {/* Adjusted span */}
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(member.registrationStatus, 'registration')}
-                  <Badge 
-                    variant="outline" 
-                    className={registrationConfig.className}
-                  >
-                    {registrationConfig.label}
-                  </Badge>
-                </div>
-              </div>
-              
-              {/* Pass Status */}
-              <div className="col-span-2"> {/* Adjusted span */}
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(member.passStatus, 'pass')}
-                  <Badge 
-                    variant="outline" 
-                    className={passConfig.className}
-                  >
-                    {passConfig.label}
-                  </Badge>
-                </div>
-              </div>
 
-              {/* Zone and Special Pass Request - Display and Edit (if bulkEditMode) */}
-              {bulkEditMode ? (
+              {/* Zone and Special Pass Request - Editable if onUpdateMemberDetails is provided */}
+              {onUpdateMemberDetails ? (
                 <>
-                  <div className="col-span-1"> {/* Adjusted span */}
-                    <Select 
-                      value={member.zone || ''} 
-                      onValueChange={(value) => onUpdateMemberDetails(member.id, { zone: value as 'CMZ' | 'MCZ' })}
+                  <div className="col-span-2"> {/* Adjusted span */}
+                    <Select
+                      value={member.zone || ''}
+                      onValueChange={(value: "CMZ" | "MCZ") => onUpdateMemberDetails(member.id, { zone: value })}
                     >
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue placeholder="Zone" />
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Select Zone" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CMZ">CMZ</SelectItem>
@@ -161,12 +120,12 @@ export default function FamilyMembersTable({
                     </Select>
                   </div>
                   <div className="col-span-2"> {/* Adjusted span */}
-                    <Select 
-                      value={member.specialPassRequest || ''} 
-                      onValueChange={(value) => onUpdateMemberDetails(member.id, { specialPassRequest: value as 'Rahat' | 'Non Critical Rahat' | 'Mum with Kids' })}
+                    <Select
+                      value={member.specialPassRequest || ''}
+                      onValueChange={(value: "Rahat" | "Non Critical Rahat" | "Mum with Kids") => onUpdateMemberDetails(member.id, { specialPassRequest: value })}
                     >
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue placeholder="Special Pass" />
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Select Pass Type" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Rahat">Rahat</SelectItem>

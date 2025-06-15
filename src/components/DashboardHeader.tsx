@@ -29,7 +29,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           {/* User Info and Logout */}
           <div className="flex items-center space-x-6">
             <div className="text-sm opacity-90">
-              {user.id} | {user.name}
+              {user.its_id} | {user.full_name}
             </div>
             <Button variant="ghost" size="sm" className="text-white hover:bg-primary-green-dark">
               <LogOut className="h-4 w-4 mr-1" />

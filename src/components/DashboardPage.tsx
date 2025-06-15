@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FamilyMember, User } from '@/types';
 import DashboardHeader from './DashboardHeader';
-import FamilyMembersTable from './FamilyMembersTable';
+// import FamilyMembersTable from './FamilyMembersTable'; // Removed as per new requirement
 // import PassStatusSection from './PassStatusSection'; // Removed
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link'; // Added for navigation tabs
@@ -13,7 +13,7 @@ import { Plus, Users, Edit, HomeIcon } from 'lucide-react';
 // import AccommodationForm from './AccommodationForm'; // Removed, as accommodation details are on a separate page
 
 export default function DashboardPage() {
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  // const [selectedMembers, setSelectedMembers] = useState<string[]>([]); // Removed
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -53,79 +53,38 @@ export default function DashboardPage() {
         console.error('Failed to fetch user data:', error);
       }
 
-      // Fetch Family Members Details
+      // Fetch Family Members Details using the provided API
       try {
         const familyResponse = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/family-by-its-id?its_id=${its_no}`);
         if (!familyResponse.ok) {
           throw new Error(`Family API request failed with status ${familyResponse.status}`);
         }
         const familyResult = await familyResponse.json();
+        // Assuming the API directly returns an array of family members as per the sample response
         if (familyResult.success && familyResult.data) {
           const transformedFamilyMembers: FamilyMember[] = familyResult.data.map((apiMember: any) => ({
-            id: apiMember.its_id.toString(),
-            serialNumber: apiMember.its_id,
+            its_id: apiMember.its_id,
             fullname: apiMember.fullname,
-            registrationStatus: 'PENDING',
-            passStatus: 'PENDING',
-            dataStatus: 'PENDING',
-            zone: apiMember.zone,
-            specialPassRequest: apiMember.special_pass_request,
-            accommodation: apiMember.accommodation,
+            country: apiMember.country,
+            venue_waaz: apiMember.venue_waaz,
+            acc_zone: apiMember.acc_zone,
+            gender: apiMember.gender,
           }));
           setFamilyMembers(transformedFamilyMembers);
         } else {
-          console.error('Family API request was not successful or data is missing', familyResult);
+          console.error('Family API request was not successful or data is missing/malformed', familyResult);
+          setFamilyMembers([]); // Set to empty array on error or bad data
         }
       } catch (error) {
         console.error('Failed to fetch family data:', error);
+        setFamilyMembers([]); // Set to empty array on fetch error
       }
     };
 
     fetchData();
   }, []);
 
-  const handleMemberSelection = (memberId: string, isSelected: boolean) => {
-    // For radio buttons in normal mode
-    if (isSelected) {
-      setSelectedMembers([memberId]);
-    } else {
-      setSelectedMembers([]);
-    }
-  };
-
-  const handleSelectAll = (isSelected: boolean) => {
-    // When not in bulk edit mode, selecting all is not typical for radio buttons, 
-    // but if needed, it would select the first member or clear selection.
-    if (isSelected && familyMembers.length > 0) {
-      setSelectedMembers([familyMembers[0].id]);
-    } else {
-      setSelectedMembers([]);
-    }
-  };
-
-  const handleUpdateMemberDetails = (memberId: string, details: Partial<FamilyMember>) => {
-    setFamilyMembers(prevMembers =>
-      prevMembers.map(member =>
-        member.id === memberId ? { ...member, ...details } : member
-      )
-    );
-    // If the updated member is the currently selected one for PassStatusSection, refresh its view
-    if (selectedMembers.includes(memberId)) {
-      // This might involve re-fetching or just relying on the state update to re-render PassStatusSection
-      // For now, the state update of familyMembers should trigger a re-render.
-    };
-  }
-
-  const handleSaveChanges = async (memberId: string, zone: string | undefined, specialPassRequest: string | undefined) => {
-    // Simulate API call
-    console.log(`Saving changes for member ${memberId}: Zone - ${zone}, Pass - ${specialPassRequest}`);
-    // Here you would typically make a POST/PUT request to your backend API
-    // For example: await fetch(`/api/members/${memberId}/update`, { method: 'POST', body: JSON.stringify({ zone, specialPassRequest }) });
-    // Add error handling and success feedback as needed
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-    console.log(`Changes saved for member ${memberId}`);
-    // Optionally, refetch data or update local state if the API call modifies data that needs to be reflected immediately
-  };
+  // Removed handleUpdateMemberDetails and handleSaveChanges as they are not needed for the new table display
 
 
   if (!currentUser) {
@@ -155,15 +114,34 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-2">
-            <FamilyMembersTable
-              members={familyMembers}
-              selectedMembers={selectedMembers}
-              onMemberSelection={handleMemberSelection}
-              onSelectAll={handleSelectAll}
-              selectionMode={'radio'}
-              onUpdateMemberDetails={handleUpdateMemberDetails} // Added to enable editing features
-              onSaveChanges={handleSaveChanges} // Added to enable the update button
-            />
+            {familyMembers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ITS ID</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue Waaz</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accommodation Zone</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {familyMembers.map((member) => (
+                      <tr key={member.its_id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.its_id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.fullname}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.country || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.venue_waaz || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.acc_zone || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">No family members found or data is loading.</p>
+            )}
           </CardContent>
         </Card>
       </main>

@@ -2,7 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FamilyMember, User } from '@/types';
+import { FamilyMember, User, PassPreference, ApiBlock } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button'; // Added Button import
 import DashboardHeader from '@/components/DashboardHeader';
 import NavigationTabs from '@/components/NavigationTabs';
 import FamilyMembersTable from '@/components/FamilyMembersTable';
@@ -13,6 +15,9 @@ export default function PassDetailsPage() {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]); // Required by FamilyMembersTable, though not used for selection actions here
+  const [passPreferencesData, setPassPreferencesData] = useState<PassPreference[]>([]);
+  const [memberPassSelections, setMemberPassSelections] = useState<Record<number, { venueId?: number; blockId?: number }>>({});
+  const [updatingMember, setUpdatingMember] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,6 +25,16 @@ export default function PassDetailsPage() {
       if (!its_no) {
         console.error('ITS number not found in localStorage');
         return;
+      }
+
+      // Fetch Pass Preferences Data
+      try {
+        const passPrefsResponse = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/summary?event_id=1');
+        if (!passPrefsResponse.ok) throw new Error('Failed to fetch pass preferences');
+        const passPrefsJsonData = await passPrefsResponse.json(); // Assuming direct array response
+        setPassPreferencesData(passPrefsJsonData);
+      } catch (error) {
+        console.error('Error fetching pass preferences:', error);
       }
 
       // Fetch Logged-in User Details
@@ -39,15 +54,12 @@ export default function PassDetailsPage() {
         const familyData = await familyResponse.json();
         if (familyData.success && familyData.data) {
           const transformedFamilyMembers: FamilyMember[] = familyData.data.map((apiMember: any) => ({
-            id: apiMember.its_id.toString(),
-            serialNumber: apiMember.its_id,
+            its_id: apiMember.its_id,
             fullname: apiMember.fullname,
-            registrationStatus: 'PENDING', // Placeholder
-            passStatus: 'PENDING', // Placeholder
-            dataStatus: 'PENDING', // Placeholder
-            zone: apiMember.zone,
-            specialPassRequest: apiMember.special_pass_request,
-            accommodation: apiMember.accommodation,
+            gender: apiMember.gender,
+            country: apiMember.country,
+            venue_waaz: apiMember.venue_waaz,
+            acc_zone: apiMember.acc_zone
           }));
           setFamilyMembers(transformedFamilyMembers);
         }
@@ -58,38 +70,62 @@ export default function PassDetailsPage() {
     fetchData();
   }, []);
 
-  const handleUpdateMemberDetails = (memberId: string, details: Partial<Pick<FamilyMember, 'zone' | 'specialPassRequest'>>) => {
-    setFamilyMembers(prevMembers =>
-      prevMembers.map(member =>
-        member.id === memberId ? { ...member, ...details } : member
-      )
-    );
-    // Here you would also include an API call to persist these changes to the backend
-    console.log(`Updating member ${memberId} with`, details);
-    // Example API call (uncomment and adapt):
-    /*
-    const its_no = localStorage.getItem('its_no');
-    fetch(`https://your-api-endpoint/update-member-details`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ its_id: its_no, member_id_to_update: memberId, ...details })
-    })
-    .then(response => response.json())
-    .then(data => console.log('Update successful:', data))
-    .catch(error => console.error('Error updating member:', error));
-    */
-  };
-  
-  // Dummy handler for onMemberSelection and onSelectAll as they are not primary features of this page
-  // but are required by FamilyMembersTable
-  const handleMemberSelection = (memberId: string, isSelected: boolean) => {
-    // console.log('Member selection changed:', memberId, isSelected);
-    // setSelectedMembers(prev => isSelected ? [...prev, memberId] : prev.filter(id => id !== memberId));
+  const handleVenueChange = (memberId: number, venueIdString: string) => {
+    const venueId = parseInt(venueIdString, 10);
+    setMemberPassSelections(prev => ({
+      ...prev,
+      [memberId]: { venueId, blockId: undefined } // Reset blockId when venue changes
+    }));
   };
 
-  const handleSelectAll = (isSelected: boolean) => {
-    // console.log('Select all changed:', isSelected);
-    // setSelectedMembers(isSelected ? familyMembers.map(m => m.id) : []);
+  const handleBlockChange = (memberId: number, blockIdString: string) => {
+    const blockId = parseInt(blockIdString, 10);
+    setMemberPassSelections(prev => ({
+      ...prev,
+      [memberId]: { ...prev[memberId], blockId }
+    }));
+  };
+
+  const handleUpdatePassPreference = async (memberId: number) => {
+    const selection = memberPassSelections[memberId];
+    if (!selection || typeof selection.blockId === 'undefined') {
+      console.error('No block selected for member:', memberId);
+      // Optionally, show a user-facing error message here
+      alert('Please select a pass type before updating.');
+      return;
+    }
+
+    setUpdatingMember(memberId);
+    try {
+      const response = await fetch('YOUR_API_ENDPOINT_HERE', { // Replace with your actual API endpoint
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other necessary headers, like Authorization tokens
+        },
+        body: JSON.stringify({
+          its_id: memberId,
+          block_id: selection.blockId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update pass preference');
+      }
+
+      const result = await response.json();
+      console.log('Update successful:', result);
+      alert('Pass preference updated successfully!');
+      // Optionally, you might want to re-fetch family data or update local state
+      // to reflect changes if the API response indicates success and returns new data.
+
+    } catch (error) {
+      console.error('Error updating pass preference:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`);
+    } finally {
+      setUpdatingMember(null);
+    }
   };
 
   if (!currentUser) {
@@ -100,7 +136,7 @@ export default function PassDetailsPage() {
     <div className="min-h-screen bg-gradient-to-br from-secondary-cream/20 to-white">
       <DashboardHeader user={currentUser} />
       <main className="container mx-auto px-4 py-6 space-y-6">
-      <NavigationTabs /> {/* Add the NavigationTabs component */}
+        <NavigationTabs /> {/* Add the NavigationTabs component */}
         <h1 className="text-2xl font-semibold text-primary-green mb-4">Pass Details</h1>
         <Card className="border-primary-green/20">
           <CardHeader>
@@ -115,14 +151,97 @@ export default function PassDetailsPage() {
             </p>
           </CardHeader>
           <CardContent className="pt-4">
-            <FamilyMembersTable 
-              members={familyMembers}
-              selectedMembers={selectedMembers} // Pass empty or manage if selection is needed for other features
-              onMemberSelection={handleMemberSelection} // Dummy handler
-              onSelectAll={handleSelectAll} // Dummy handler
-              selectionMode={'checkbox'} // Checkbox mode might be more intuitive if any row-specific actions were added later
-              onUpdateMemberDetails={handleUpdateMemberDetails}
-            />
+            <div className="border rounded-lg overflow-hidden">
+              {/* Table Header */}
+              <div className="bg-tertiary-gold text-white">
+                <div className="grid grid-cols-12 gap-2 p-3 text-sm font-medium text-primary">
+                  <div className="col-span-1">ITS No</div>
+                  <div className="col-span-4">Full Name</div>
+                  <div className="col-span-2">Venue</div>
+                  <div className="col-span-2">Pass Type</div>
+                  <div className="col-span-3">Action</div>
+                </div>
+              </div>
+
+              {/* Table Body */}
+              <div className="bg-white">
+                {familyMembers.map((member) => { // Removed index as it's not used
+
+                  return (
+                    // Adjusted column spans to match new header
+                    <div
+                      key={member.its_id}
+                      className={`grid grid-cols-12 gap-2 p-3 text-sm border-b border-gray-100 hover:bg-gray-50 transition-colors items-center`}
+                    >
+                      {/* ITS No */}
+                      <div className="col-span-1 font-medium text-gray-700">
+                        {member.its_id}
+                      </div>
+
+                      {/* Full Name */}
+                      <div className="col-span-4 font-medium text-gray-900">
+                        <div>{member.fullname}</div>
+                      </div>
+
+                      {/* Venue Dropdown */}
+                      <div className="col-span-2">
+                        <Select
+                          value={memberPassSelections[member.its_id]?.venueId?.toString() || ''}
+                          onValueChange={(value) => handleVenueChange(member.its_id, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Venue" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {passPreferencesData.map((preference) => (
+                              <SelectItem key={preference.id} value={preference.id.toString()}>
+                                {preference.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Pass Type Dropdown */}
+                      <div className="col-span-2">
+                        <Select
+                          value={memberPassSelections[member.its_id]?.blockId?.toString() || ''}
+                          onValueChange={(value) => handleBlockChange(member.its_id, value)}
+                          disabled={!memberPassSelections[member.its_id]?.venueId}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Pass Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {passPreferencesData
+                              .find(p => p.id === memberPassSelections[member.its_id]?.venueId)
+                              ?.blocks.filter(block => 
+                                member.gender && (block.gender === member.gender.toLowerCase() || block.gender === 'both')
+                              )
+                              .map(block => (
+                                <SelectItem key={block.id} value={block.id.toString()}>
+                                  {block.type} (Av: {block.availability})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Update Button */}
+                      <div className="col-span-3 flex items-center justify-start">
+                        <Button 
+                          onClick={() => handleUpdatePassPreference(member.its_id)}
+                          disabled={!memberPassSelections[member.its_id]?.blockId || updatingMember === member.its_id}
+                          size="sm"
+                        >
+                          {updatingMember === member.its_id ? 'Updating...' : 'Update'}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </main>

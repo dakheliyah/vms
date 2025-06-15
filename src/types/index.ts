@@ -9,19 +9,12 @@ export interface Accommodation {
 }
 
 export interface FamilyMember {
-  id: string;
-  serialNumber: number;
+  its_id: number;
   fullname: string;
-  registrationStatus: 'REGISTERED' | 'PENDING' | 'REJECTED';
-  passStatus: 'ALLOCATED' | 'PENDING' | 'CANCELLED';
-  dataStatus: 'VERIFIED' | 'PENDING' | 'INCOMPLETE';
-  venue?: string;
-  seat?: string;
-  gate?: string;
-  scanStatus?: 'SCANNED' | 'NOT_SCANNED';
-  zone?: 'CMZ' | 'MCZ';
-  specialPassRequest?: 'Rahat' | 'Non Critical Rahat' | 'Mum with Kids';
-  accommodation?: Accommodation;
+  country?: string | null;
+  venue_waaz?: string | null;
+  acc_zone?: string | null;
+  gender?: string;
 }
 
 export interface PassRequest {
@@ -65,4 +58,22 @@ export interface StatusConfig {
   label: string;
   variant: StatusVariant;
   className?: string;
+}
+
+export interface ApiBlock {
+  id: number;
+  type: string;
+  capacity: number;
+  gender: 'male' | 'female' | 'both';
+  min_age: number;
+  max_age: number;
+  vaaz_center_name: string;
+  issued_passes: number;
+  availability: number;
+}
+
+export interface PassPreference {
+  id: number;
+  name: string;
+  blocks: ApiBlock[];
 }

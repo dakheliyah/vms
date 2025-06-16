@@ -128,7 +128,7 @@ export default function AccommodationDetailsPage() {
     <div className="min-h-screen bg-gradient-to-br from-secondary-cream/20 to-white">
       <DashboardHeader user={currentUser} />
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <NavigationTabs />
+        {/* <NavigationTabs /> */}
         <h1 className="text-2xl font-semibold text-primary-green">Accommodation Details</h1>
 
         {/* Step 1: Choose Update Mode */}

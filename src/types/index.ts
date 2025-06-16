@@ -76,6 +76,7 @@ export interface ApiBlock {
   vaaz_center_name: string;
   issued_passes: number;
   availability: number;
+  block_availability: number;
 }
 
 export interface PassPreference {

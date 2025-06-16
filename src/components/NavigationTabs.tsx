@@ -1,30 +1,45 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { CreditCard, Building2, Home } from 'lucide-react';
+import { CreditCard, Building2, Home, Plane } from 'lucide-react'; // Added Plane icon
+import type { LucideIcon } from 'lucide-react';
 
-export default function NavigationTabs() {
-  const pathname = usePathname();
+interface Tab {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  description: string;
+}
 
-  const tabs = [
-    { 
-      name: 'Home', 
-      href: '/', 
+interface NavigationTabsProps {
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export default function NavigationTabs({ activeTab, onTabChange }: NavigationTabsProps) {
+  const tabs: Tab[] = [
+    {
+      id: 'home',
+      name: 'Home',
       icon: Home,
       description: 'Manage family member information'
     },
-    { 
-      name: 'Pass Details', 
-      href: '/pass-details', 
+    {
+      id: 'pass-details',
+      name: 'Pass Details',
       icon: CreditCard,
       description: 'View and manage pass information'
     },
-    { 
-      name: 'Accommodation Details', 
-      href: '/accommodation-details', 
+    {
+      id: 'accommodation-details',
+      name: 'Accommodation Details',
       icon: Building2,
       description: 'Accommodation booking details'
+    },
+    {
+      id: 'arrival-details',
+      name: 'Arrival Details',
+      icon: Plane, // Using Plane icon
+      description: 'Manage arrival information'
     },
   ];
 
@@ -35,14 +50,15 @@ export default function NavigationTabs() {
         <nav className="flex space-x-1" role="tablist">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = pathname === tab.href;
+            const isActive = activeTab === tab.id;
             
             return (
-              <Link
-                key={tab.name}
-                href={tab.href}
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
                 role="tab"
                 aria-selected={isActive}
+                type="button"
                 className={`
                   group relative flex items-center gap-3 px-4 py-3 rounded-md font-medium text-sm
                   transition-all duration-200 ease-in-out min-w-0 flex-1
@@ -79,13 +95,12 @@ export default function NavigationTabs() {
                 {/* Hover effect background */}
                 <div className={`
                   absolute inset-0 rounded-md transition-opacity duration-200
-                  ${
-                    isActive 
+                  ${isActive 
                       ? 'opacity-0' 
                       : 'opacity-0 group-hover:opacity-100 bg-gradient-to-r from-primary-green/5 to-primary-green/10'
                   }
                 `} />
-              </Link>
+              </button>
             );
           })}
         </nav>
@@ -94,9 +109,9 @@ export default function NavigationTabs() {
       {/* Optional: Add a subtle description for the active tab */}
       <div className="mt-3 px-1">
         {tabs.map((tab) => {
-          if (pathname === tab.href) {
+          if (activeTab === tab.id) {
             return (
-              <p key={tab.href} className="text-sm text-gray-500 animate-fade-in">
+              <p key={tab.id} className="text-sm text-gray-500 animate-fade-in">
                 {tab.description}
               </p>
             );

@@ -135,7 +135,7 @@ export default function PassDetailsPage() {
     <div className="min-h-screen bg-gradient-to-br from-secondary-cream/20 to-white">
       <DashboardHeader user={currentUser} />
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <NavigationTabs /> {/* Add the NavigationTabs component */}
+        {/* <NavigationTabs /> Add the NavigationTabs component */}
         <h1 className="text-2xl font-semibold text-primary-green mb-4">Pass Details</h1>
         <Card className="border-primary-green/20">
           <CardHeader>

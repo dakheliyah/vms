@@ -7,7 +7,6 @@ import DashboardHeader from './DashboardHeader';
 // import PassStatusSection from './PassStatusSection'; // Removed
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link'; // Added for navigation tabs
-import NavigationTabs from './NavigationTabs'; // Import the new component
 import { Button } from '@/components/ui/button';
 import { Plus, Users, Edit, HomeIcon } from 'lucide-react';
 // import AccommodationForm from './AccommodationForm'; // Removed, as accommodation details are on a separate page
@@ -99,9 +98,6 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 space-y-6">
-
-        {/* Navigation Tabs */}
-        <NavigationTabs />
 
         {/* Family Members Section */}
         <Card className="border-primary-green/20">

@@ -1,60 +1,40 @@
 // src/components/HomeDashboardContent.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FamilyMember, User } from '@/types';
+import { User } from '@/types'; // Removed useState, useEffect, FamilyMember (it will come from hook)
+import useFamilyMembers from '@/lib/hooks/useFamilyMembers'; // Added hook import
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface HomeDashboardContentProps {
   currentUser: User | null; // Pass currentUser as a prop
 }
 
 export default function HomeDashboardContent({ currentUser }: HomeDashboardContentProps) {
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  // TODO: The useFamilyMembers hook currently doesn't take any parameters like currentUser.its_id.
+  // It needs to be modified or a new hook created if family members are specific to the currentUser.
+  // For now, assuming useFamilyMembers fetches all relevant family members or is context-aware.
+  const { familyMembers, isLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers();
+  console.log(currentUser);
 
   useEffect(() => {
-    const fetchFamilyData = async () => {
-      if (!currentUser || !currentUser.its_id) {
-        // console.error('Current user or ITS ID not available for fetching family data.');
-        setFamilyMembers([]); // Clear family members if no user
-        return;
-      }
-      
-      const its_no = localStorage.getItem('its_no');
-      if (!its_no) {
-        console.error('ITS number not found in localStorage');
-        return;
-      }
+    // If fetching family members depends on currentUser, trigger refetch when currentUser is available
+    if (currentUser && currentUser.its_id) {
+      // Potentially pass currentUser.its_id to refetchFamilyMembers if the hook supports it
+      // refetchFamilyMembers(currentUser.its_id); 
+    } else {
+      // Handle case where currentUser is not available (e.g., clear family members or show a message)
+    }
+  }, [currentUser, refetchFamilyMembers]);
 
-      try {
-        const familyResponse = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/family-by-its-id?its_id=${its_no}`);
-        if (!familyResponse.ok) {
-          throw new Error(`Family API request failed with status ${familyResponse.status}`);
-        }
-        const familyResult = await familyResponse.json();
-        if (familyResult.success && familyResult.data) {
-          const transformedFamilyMembers: FamilyMember[] = familyResult.data.map((apiMember: any) => ({
-            its_id: apiMember.its_id,
-            fullname: apiMember.fullname,
-            country: apiMember.country,
-            venue_waaz: apiMember.venue_waaz,
-            acc_zone: apiMember.acc_zone,
-            gender: apiMember.gender, // Ensure gender is mapped if available and needed
-          }));
-          setFamilyMembers(transformedFamilyMembers);
-        } else {
-          console.error('Family API request was not successful or data is missing/malformed', familyResult);
-          setFamilyMembers([]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch family data:', error);
-        setFamilyMembers([]);
-      }
-    };
+  if (isLoading) {
+    return <div className="text-center py-4">Loading family members...</div>;
+  }
 
-    fetchFamilyData();
-  }, [currentUser]); // Re-fetch if currentUser changes
+  if (familyError) {
+    return <div className="text-center py-4 text-red-500">Error loading family members: {familyError}</div>;
+  }
 
   // if (!currentUser) {
   //   // This can be handled by the parent, or show a specific message
@@ -69,10 +49,12 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
             <Users className="h-5 w-5" />
             List of family member(s)
           </CardTitle>
+          {/* Optional: Add a button to refetch family members */}
+          {/* <button onClick={() => refetchFamilyMembers()} className="text-sm text-blue-500">Refresh</button> */}
         </div>
       </CardHeader>
       <CardContent className="pt-2">
-        {familyMembers.length > 0 ? (
+        {familyMembers && familyMembers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -97,7 +79,7 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
           </div>
         ) : (
           <p className="text-center text-gray-500 py-4">
-            {currentUser && currentUser.its_id ? 'No family members found or data is loading.' : 'Loading user information...'}
+            {currentUser && currentUser.its_id ? 'No family members found.' : 'User information not available to load family members.'}
           </p>
         )}
       </CardContent>

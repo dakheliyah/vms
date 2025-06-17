@@ -35,6 +35,7 @@ export interface PassRequest {
 export interface User {
   its_id: string;
   fullname: string;
+  email?: string; // Added optional email
   familyId: string;
   relayCenter: string;
   location: string;
@@ -79,8 +80,37 @@ export interface ApiBlock {
   block_availability: number;
 }
 
+// Generic API Response Wrapper (example)
+export interface ApiResponseData<T> {
+  data: T;
+  message?: string;
+  status?: number; // HTTP status or custom status code
+}
+
+// Placeholder for a more detailed User Profile from API
+export interface UserProfileApiResponse extends User { // Extends existing User, can be more specific
+  // Add API specific fields here, e.g.:
+  // last_login_at?: string;
+  // roles?: string[];
+}
+
+// Placeholder for Family Member API response (if different from FamilyMember type)
+export interface FamilyMemberApiResponse extends FamilyMember {
+  // API specific fields
+}
+
 export interface PassPreference {
   id: number;
   name: string;
   blocks: ApiBlock[];
 }
+
+// Example of a more specific type for an API endpoint if needed
+// export interface SpecificEndpointResponse {
+//   items: SomeType[];
+//   pagination: {
+//     total: number;
+//     per_page: number;
+//     current_page: number;
+//   };
+// }

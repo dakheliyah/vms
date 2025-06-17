@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FamilyMember, User, PassPreference } from '@/types'; // Removed ApiBlock as it's not used directly here
+import { FamilyMember, User, PassPreference } from '@/types';
+import useFamilyMembers from '@/lib/hooks/useFamilyMembers'; // Import the hook
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ interface PassDetailsContentProps {
 }
 
 export default function PassDetailsContent({ currentUser }: PassDetailsContentProps) {
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const { familyMembers, isLoading: isLoadingFamilyMembers, error: familyMembersError, refetch: refetchFamilyMembers } = useFamilyMembers();
   // SelectedMembers is not used for selection actions here, but kept if other logic depends on it.
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]); 
   const [passPreferencesData, setPassPreferencesData] = useState<PassPreference[]>([]);
@@ -38,30 +39,23 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
         console.error('Error fetching pass preferences:', error);
       }
 
-      // Fetch Family Members Details (currentUser is passed as prop, no need to fetch here if already available)
-      if (currentUser) { // Check if currentUser is available
-        try {
-          const familyResponse = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/family-by-its-id?its_id=${its_no}`);
-          if (!familyResponse.ok) throw new Error('Failed to fetch family details');
-          const familyData = await familyResponse.json();
-          if (familyData.success && familyData.data) {
-            const transformedFamilyMembers: FamilyMember[] = familyData.data.map((apiMember: any) => ({
-              its_id: apiMember.its_id,
-              fullname: apiMember.fullname,
-              gender: apiMember.gender,
-              country: apiMember.country,
-              venue_waaz: apiMember.venue_waaz,
-              acc_zone: apiMember.acc_zone
-            }));
-            setFamilyMembers(transformedFamilyMembers);
-          }
-        } catch (error) {
-          console.error('Error fetching family details:', error);
-        }
-      }
     };
+    // Initial fetch of pass preferences
     fetchData();
-  }, [currentUser]); // Add currentUser to dependency array
+    // Family members are now fetched by the useFamilyMembers hook
+    // We can call refetchFamilyMembers if currentUser changes and we need to re-trigger, 
+    // but the hook itself should handle its own initial fetch based on localStorage 'its_no'.
+    // If the hook needs currentUser.its_id, the hook itself would need to be modified or take it as a param.
+  }, [currentUser]); // Dependency array might need adjustment based on how/if refetchFamilyMembers is used with currentUser
+
+  // Handle loading and error states from the useFamilyMembers hook
+  if (isLoadingFamilyMembers) {
+    return <div>Loading family member details...</div>;
+  }
+
+  if (familyMembersError) {
+    return <div>Error loading family details: {familyMembersError}. <Button onClick={refetchFamilyMembers}>Try again</Button></div>;
+  }
 
   const handleVenueChange = (memberId: number, venueIdString: string) => {
     const venueId = parseInt(venueIdString, 10);

@@ -102,6 +102,9 @@ export interface FamilyMemberApiResponse extends FamilyMember {
 export interface PassPreference {
   id: number;
   name: string;
+  vaaz_center_capacity: number;
+  vaaz_center_issued_passes: number;
+  vaaz_center_availability: number;
   blocks: ApiBlock[];
 }
 

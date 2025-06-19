@@ -43,10 +43,10 @@ export default function Home() {
         return <HomeDashboardContent currentUser={currentUser} />;
       case 'pass-details':
         return <PassDetailsContent currentUser={currentUser} />;
-      case 'accommodation-details':
-        return <AccommodationDetailsContent currentUser={currentUser} />;
-      case 'arrival-details': // Added case for new tab
-        return <ArrivalDetailsContent currentUser={currentUser} />;
+      // case 'accommodation-details':
+      //   return <AccommodationDetailsContent currentUser={currentUser} />;
+      // case 'arrival-details': // Added case for new tab
+      //   return <ArrivalDetailsContent currentUser={currentUser} />;
       default:
         return <HomeDashboardContent currentUser={currentUser} />;
     }

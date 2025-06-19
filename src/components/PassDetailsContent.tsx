@@ -18,8 +18,8 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
   // SelectedMembers is not used for selection actions here, but kept if other logic depends on it.
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]); 
   const [passPreferencesData, setPassPreferencesData] = useState<PassPreference[]>([]);
-  const [memberPassSelections, setMemberPassSelections] = useState<Record<number, { venueId?: number; blockId?: number }>>({});
-  const [updatingMember, setUpdatingMember] = useState<number | null>(null);
+  const [memberPassSelections, setMemberPassSelections] = useState<Record<number, { venueId?: number }>>({});
+  const [updatingMember, setUpdatingMember] = useState<number | null>(null); // Kept for now, might be used for venue update status
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +31,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
 
       // Fetch Pass Preferences Data
       try {
-        const passPrefsResponse = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/summary?event_id=1');
+        const passPrefsResponse = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center-summary?event_id=1');
         if (!passPrefsResponse.ok) throw new Error('Failed to fetch pass preferences');
         const passPrefsJsonData = await passPrefsResponse.json();
         setPassPreferencesData(passPrefsJsonData);
@@ -57,59 +57,48 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
     return <div>Error loading family details: {familyMembersError}. <Button onClick={refetchFamilyMembers}>Try again</Button></div>;
   }
 
-  const handleVenueChange = (memberId: number, venueIdString: string) => {
-    const venueId = parseInt(venueIdString, 10);
-    setMemberPassSelections(prev => ({
-      ...prev,
-      [memberId]: { venueId, blockId: undefined } // Reset blockId when venue changes
-    }));
-  };
-
-  const handleBlockChange = (memberId: number, blockIdString: string) => {
-    const blockId = parseInt(blockIdString, 10);
-    setMemberPassSelections(prev => ({
-      ...prev,
-      [memberId]: { ...prev[memberId], blockId }
-    }));
-  };
-
-  const handleUpdatePassPreference = async (memberId: number) => {
-    const selection = memberPassSelections[memberId];
-    if (!selection || typeof selection.blockId === 'undefined') {
-      console.error('No block selected for member:', memberId);
-      alert('Please select a pass type before updating.');
-      return;
-    }
-
+  const handleVenueUpdate = async (memberId: number, venueId: number) => {
     setUpdatingMember(memberId);
+    const its_no = localStorage.getItem('its_no');
     try {
-      // Replace with your actual API endpoint
-      const response = await fetch('YOUR_API_ENDPOINT_HERE', { 
+      // The user will provide the final API endpoint.
+      const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Token': its_no || '',
         },
         body: JSON.stringify({
           its_id: memberId,
-          block_id: selection.blockId,
+          vaaz_center_id: venueId,
+          event_id: 1,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update pass preference');
+        throw new Error(errorData.message || 'Failed to update venue preference');
       }
 
       const result = await response.json();
       console.log('Update successful:', result);
-      alert('Pass preference updated successfully!');
     } catch (error) {
-      console.error('Error updating pass preference:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred.'}`);
+      console.error('Error updating venue preference:', error);
     } finally {
       setUpdatingMember(null);
     }
   };
+
+  const handleVenueChange = (memberId: number, venueIdString: string) => {
+    const venueId = parseInt(venueIdString, 10);
+    setMemberPassSelections(prev => ({
+      ...prev,
+      [memberId]: { venueId }
+    }));
+    handleVenueUpdate(memberId, venueId);
+  };
+
+
 
   if (!currentUser) {
     // This component expects currentUser to be passed, 
@@ -139,10 +128,8 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             <div className="bg-tertiary-gold text-white">
               <div className="grid grid-cols-12 gap-2 p-3 text-sm font-medium text-primary">
                 <div className="col-span-1">ITS No</div>
-                <div className="col-span-4">Full Name</div>
-                <div className="col-span-2">Venue</div>
-                <div className="col-span-2">Pass Type</div>
-                <div className="col-span-3">Action</div>
+                <div className="col-span-5">Full Name</div>
+                <div className="col-span-6">Venue</div>
               </div>
             </div>
 
@@ -156,13 +143,14 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                   <div className="col-span-1 font-medium text-gray-700">
                     {member.its_id}
                   </div>
-                  <div className="col-span-4 font-medium text-gray-900">
+                  <div className="col-span-5 font-medium text-gray-900">
                     <div>{member.fullname}</div>
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-6">
                     <Select
                       value={memberPassSelections[member.its_id]?.venueId?.toString() || ''}
                       onValueChange={(value) => handleVenueChange(member.its_id, value)}
+                      disabled={updatingMember === member.its_id}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Venue" />
@@ -175,38 +163,6 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="col-span-2">
-                  <Select
-                          value={memberPassSelections[member.its_id]?.blockId?.toString() || ''}
-                          onValueChange={(value) => handleBlockChange(member.its_id, value)}
-                          disabled={!memberPassSelections[member.its_id]?.venueId}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Pass Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {passPreferencesData
-                              .find(p => p.id === memberPassSelections[member.its_id]?.venueId)
-                              ?.blocks.filter(block => 
-                                member.gender && (block.gender === member.gender.toLowerCase() || block.gender === 'both')
-                              )
-                              .map(block => (
-                                <SelectItem key={block.id} value={block.id.toString()}>
-                                  {block.type} (Av: {block.block_availability})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                  </div>
-                  <div className="col-span-3">
-                    <Button 
-                      onClick={() => handleUpdatePassPreference(member.its_id)}
-                      disabled={!memberPassSelections[member.its_id]?.blockId || updatingMember === member.its_id}
-                      size="sm"
-                    >
-                      {updatingMember === member.its_id ? 'Updating...' : 'Update Pass'}
-                    </Button>
                   </div>
                 </div>
               ))}

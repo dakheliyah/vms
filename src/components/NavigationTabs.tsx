@@ -29,18 +29,18 @@ export default function NavigationTabs({ activeTab, onTabChange }: NavigationTab
       icon: CreditCard,
       description: 'View and manage pass information'
     },
-    {
-      id: 'accommodation-details',
-      name: 'Accommodation Details',
-      icon: Building2,
-      description: 'Accommodation booking details'
-    },
-    {
-      id: 'arrival-details',
-      name: 'Arrival Details',
-      icon: Plane, // Using Plane icon
-      description: 'Manage arrival information'
-    },
+    // {
+    //   id: 'accommodation-details',
+    //   name: 'Accommodation Details',
+    //   icon: Building2,
+    //   description: 'Accommodation booking details'
+    // },
+    // {
+    //   id: 'arrival-details',
+    //   name: 'Arrival Details',
+    //   icon: Plane, // Using Plane icon
+    //   description: 'Manage arrival information'
+    // },
   ];
 
   return (

@@ -2,24 +2,25 @@
 
 import { useEffect } from 'react';
 
-// Helper function to parse cookies
-const getCookie = (name: string): string | undefined => {
-  if (typeof document === 'undefined') return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-};
-
 const LocalStorageInitializer = () => {
   useEffect(() => {
-    console.log('Document cookie:', document.cookie);
-    const itsNoFromCookie = getCookie('its_no');
-    console.log('Parsed its_no cookie:', itsNoFromCookie);
-    if (itsNoFromCookie) {
-      localStorage.setItem('its_no', itsNoFromCookie);
-    } else {
-      // window.location.href = 'https://colombo-relay.asharamubaraka.net/';
-    }
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+
+        if (response.ok && data.its_no) {
+          localStorage.setItem('its_no', data.its_no);
+        } else {
+          window.location.href = 'https://colombo-relay.asharamubaraka.net/';
+        }
+      } catch (error) {
+        console.error('Failed to check session:', error);
+        window.location.href = 'https://colombo-relay.asharamubaraka.net/';
+      }
+    };
+
+    checkSession();
   }, []); // Empty dependency array ensures this runs only once on mount
 
   return null; // This component does not render anything

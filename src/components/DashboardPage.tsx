@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
       // Fetch Family Members Details using the provided API
       try {
-        const familyResponse = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/family-by-its-id?its_id=${its_no}`);
+        const familyResponse = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/family-by-its-id?its_id=${its_no}&event_id=1`);
         if (!familyResponse.ok) {
           throw new Error(`Family API request failed with status ${familyResponse.status}`);
         }

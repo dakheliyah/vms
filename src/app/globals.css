@@ -136,3 +136,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+body {
+  background: url('/bg-pattern.svg') repeat;
+  background-position: 0 0;
+  /* background-size: 200px 200px; */
+}

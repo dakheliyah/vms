@@ -21,6 +21,7 @@ export interface FamilyMember {
   venue_waaz?: string | null;
   acc_zone?: string | null;
   gender?: string;
+  pass_preferences: PassPreference[];
 }
 
 export interface PassRequest {
@@ -101,6 +102,12 @@ export interface FamilyMemberApiResponse extends FamilyMember {
 
 export interface PassPreference {
   id: number;
+  event_id: number;
+  block_id: number;
+  its_id: number;
+  vaaz_center_id: number;
+  vaaz_center_name: string;
+  pass_type: string;
   name: string;
   vaaz_center_capacity: number;
   vaaz_center_issued_passes: number;

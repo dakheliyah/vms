@@ -16,7 +16,6 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
   // It needs to be modified or a new hook created if family members are specific to the currentUser.
   // For now, assuming useFamilyMembers fetches all relevant family members or is context-aware.
   const { familyMembers, isLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers();
-  console.log(currentUser);
 
   useEffect(() => {
     // If fetching family members depends on currentUser, trigger refetch when currentUser is available
@@ -62,7 +61,7 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ITS ID</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waaz Centre</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass Type</th>
+                  {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass Type</th> */}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -70,8 +69,8 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
                   <tr key={member.its_id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.its_id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.fullname}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.venue_waaz || 'Not Selected'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.acc_zone || 'Not Selected'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.pass_preferences?.[0]?.vaaz_center_name || 'Not Selected'}</td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.acc_zone || 'Not Selected'}</td> */}
                   </tr>
                 ))}
               </tbody>

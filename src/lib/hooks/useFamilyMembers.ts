@@ -23,7 +23,7 @@ const useFamilyMembers = (): UseFamilyMembersReturn => {
       return;
     }
     // TODO: Replace '/family-members' with the actual endpoint from the VMS API documentation
-    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<FamilyMember[]>> = await apiClient<ApiResponseData<FamilyMember[]>>(`/mumineen/family-by-its-id/`);
+    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<FamilyMember[]>> = await apiClient<ApiResponseData<FamilyMember[]>>(`/mumineen/family-by-its-id?event_id=1`);
 
     if (apiError) {
       setError(apiError);

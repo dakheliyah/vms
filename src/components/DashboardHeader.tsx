@@ -2,7 +2,7 @@
 
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
-import { LogOut, AlertTriangle, Home } from 'lucide-react';
+import { LogOut, AlertTriangle, Home, HomeIcon } from 'lucide-react';
 import Image from 'next/image';
 
 interface DashboardHeaderProps {
@@ -13,7 +13,35 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <header className="bg-primary text-white shadow-lg">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
+        {/* Mobile Layout */}
+        <div className="md:hidden">
+          {/* Top Row - Logo and Home Link */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <div className="w-5 h-5 bg-tertiary-gold rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">VMS</span>
+                </div>
+              </div>
+              <h1 className="text-sm font-semibold leading-tight">
+                Colombo Relay Centre<br />
+                Ashara Mubaraka 1447H
+              </h1>
+            </div>
+            <a href='https://colombo-relay.asharamubaraka.net/' className="text-xs flex items-center text-white px-2 py-1 rounded-md bg-white/10">
+              <HomeIcon className="h-3 w-3 mr-1" />
+              Home
+            </a>
+          </div>
+          
+          {/* Bottom Row - User Info */}
+          <div className="text-xs opacity-90 text-center">
+            {user.its_id} | {user.fullname}
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -31,10 +59,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <div className="text-sm opacity-90">
               {user.its_id} | {user.fullname}
             </div>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-primary-green-dark">
-              <LogOut className="h-4 w-4 mr-1" />
-              Logout
-            </Button>
+            <a href='https://colombo-relay.asharamubaraka.net/' className="text-sm flex gap-1 items-center text-white px-2 py-1 rounded-md hover:bg-white/10 transition-colors">
+              <HomeIcon className="h-4 w-4 mr-1" />
+              Back to Home
+            </a>
           </div>
         </div>
       </div>

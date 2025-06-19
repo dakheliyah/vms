@@ -39,9 +39,9 @@ export default function Home() {
     // }
 
     switch (activeTab) {
+      // case 'dashboard':
+      //   return <HomeDashboardContent currentUser={currentUser} />;
       case 'dashboard':
-        return <HomeDashboardContent currentUser={currentUser} />;
-      case 'pass-details':
         return <PassDetailsContent currentUser={currentUser} />;
       // case 'accommodation-details':
       //   return <AccommodationDetailsContent currentUser={currentUser} />;
@@ -53,10 +53,10 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen text-foreground">
       {currentUser && <Header user={currentUser} />}
       <main className="flex-grow container mx-auto px-4 py-8">
-        <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} /> */}
         <div className="mt-8">
           {renderContent()}
         </div>

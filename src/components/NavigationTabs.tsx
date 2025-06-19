@@ -17,18 +17,18 @@ interface NavigationTabsProps {
 
 export default function NavigationTabs({ activeTab, onTabChange }: NavigationTabsProps) {
   const tabs: Tab[] = [
-    {
-      id: 'home',
-      name: 'Home',
-      icon: Home,
-      description: 'Manage family member information'
-    },
-    {
-      id: 'pass-details',
-      name: 'Pass Details',
-      icon: CreditCard,
-      description: 'View and manage pass information'
-    },
+    // {
+    //   id: 'home',
+    //   name: 'Home',
+    //   icon: Home,
+    //   description: 'Manage family member information'
+    // },
+    // {
+    //   id: 'pass-details',
+    //   name: 'Pass Details',
+    //   icon: CreditCard,
+    //   description: 'View and manage pass information'
+    // },
     // {
     //   id: 'accommodation-details',
     //   name: 'Accommodation Details',

@@ -12,11 +12,13 @@ const getCookie = (name: string): string | undefined => {
 
 const LocalStorageInitializer = () => {
   useEffect(() => {
+    console.log('Document cookie:', document.cookie);
     const itsNoFromCookie = getCookie('its_no');
+    console.log('Parsed its_no cookie:', itsNoFromCookie);
     if (itsNoFromCookie) {
       localStorage.setItem('its_no', itsNoFromCookie);
     } else {
-      window.location.href = 'https://colombo-relay.asharamubaraka.net/';
+      // window.location.href = 'https://colombo-relay.asharamubaraka.net/';
     }
   }, []); // Empty dependency array ensures this runs only once on mount
 

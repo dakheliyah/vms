@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CMB Relay Centre - Waaz Centre Preference Survey",
   description: "Mumineen with Raza for Colombo Relay Centre can choose their preferred Waaz Centre from two available options.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

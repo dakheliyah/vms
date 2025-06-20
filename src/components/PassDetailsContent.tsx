@@ -334,7 +334,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
           </p>
           <ul className='text-sm text-gray-600 list-disc pl-6'>
             <li>Selection is subject to availability of quota.</li>
-            <li>Once this survey is closed your preference cannot be closed.</li>
+            <li>Once this survey is closed your preference cannot be changed.</li>
           </ul>
         </CardHeader>
         <CardContent className="pt-4">
@@ -460,7 +460,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                       {member.its_id}
                     </div>
                     <div className="col-span-4 font-medium text-gray-900">
-                      <div>{member.fullname} ({member.gender})</div>
+                      <div>{member.fullname}</div>
                     </div>
                     <div className="col-span-6">
                       <div className="space-y-2">

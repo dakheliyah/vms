@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LocalStorageInitializer from "@/components/LocalStorageInitializer"; // Import the new component
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
       >
         <LocalStorageInitializer /> {/* Add the new component here */}
         {children}
+        <Analytics/>
         <Toaster />
       </body>
     </html>

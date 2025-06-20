@@ -309,8 +309,6 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
     }
   };
 
-
-
   if (!currentUser) {
     // This component expects currentUser to be passed, 
     // so loading state might be handled by the parent.
@@ -331,7 +329,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             <li>Mufaddal Centre - MCZ</li>
           </ul>
           <p className='text-sm text-gray-600'>
-            Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net</a> before updating the survey
+            Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey
           </p>
         </CardHeader>
         <CardContent className="pt-4">
@@ -446,101 +444,134 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
 
             {/* Table Body */}
             <div className="bg-white">
-              {familyMembers.map((member) => (
-                <div
-                  key={member.its_id}
-                  className={`grid grid-cols-12 gap-2 p-3 text-sm border-b border-gray-100 hover:bg-gray-50 transition-colors items-center`}
-                >
-                  <div className="col-span-2 font-medium text-gray-700">
-                    {member.its_id}
-                  </div>
-                  <div className="col-span-4 font-medium text-gray-900">
-                    <div>{member.fullname}</div>
-                  </div>
-                  <div className="col-span-6">
-                    <div className="space-y-2">
-                      <Select
-                        value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
-                        onValueChange={(value) => handleVenueChange(member.its_id, value)}
-                        disabled={updatingMembers.has(member.its_id)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Venue" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {passPreferencesData.map((preference) => (
-                            <SelectItem disabled={preference.vaaz_center_availability === 0} key={preference.id} value={preference.id.toString()}>
-                              {preference.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {memberMessages[member.its_id] && (
-                        <div className={`flex items-center space-x-2 text-xs px-2 py-1 rounded ${
-                          memberMessages[member.its_id].type === 'success'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                          }`}></div>
-                          <span>{memberMessages[member.its_id].message}</span>
-                        </div>
-                      )}
+              {familyMembers.map((member) => {
+                const isUpdatingThisMember = updatingMembers.has(member.its_id);
+                return (
+                  <div
+                    key={member.its_id}
+                    className={`grid grid-cols-12 gap-2 p-3 text-sm border-b border-gray-100 hover:bg-gray-50 transition-colors items-center ${isUpdatingThisMember ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    <div className="col-span-2 font-medium text-gray-700">
+                      {member.its_id}
                     </div>
+                    <div className="col-span-4 font-medium text-gray-900">
+                      <div>{member.fullname} ({member.gender})</div>
+                    </div>
+                    <div className="col-span-6">
+                      <div className="space-y-2">
+                        <Select
+                          value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
+                          onValueChange={(value) => handleVenueChange(member.its_id, value)}
+                          disabled={isUpdatingThisMember}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Venue" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {passPreferencesData.map((preference) => {
+                              let isDisabled = false;
+                              if (member.gender?.toLowerCase() === 'male') {
+                                isDisabled = preference.male_availability === 0;
+                              } else if (member.gender?.toLowerCase() === 'female') {
+                                isDisabled = preference.female_availability === 0;
+                              }
+                              // If gender is not 'male' or 'female', or if preference availability for that gender is not defined,
+                              // we might keep it enabled or disable it based on total availability as a fallback.
+                              // For now, if gender doesn't match or availability field is missing, it's not explicitly disabled by this logic.
+                              // Consider adding a check for preference.vaaz_center_availability === 0 as a general fallback if needed.
+                              return (
+                                <SelectItem
+                                  key={preference.id}
+                                  value={preference.id.toString()}
+                                  disabled={isDisabled || isUpdatingThisMember}
+                                >
+                                  {preference.name}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        {memberMessages[member.its_id] && (
+                          <div className={`flex items-center space-x-2 text-xs px-2 py-1 rounded ${
+                            memberMessages[member.its_id].type === 'success'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${
+                              memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                            }`}></div>
+                            <span>{memberMessages[member.its_id].message}</span>
+                          </div>
+                        )}
+                      </div>
                   </div>
                 </div>
-              ))}
+              )}
+              )}
             </div>
           </div>
 
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
-            {familyMembers.map((member) => (
-              <Card key={member.its_id} className="border border-gray-200 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-sm font-medium text-gray-500">ITS No</div>
-                        <div className="text-base font-semibold text-gray-900">{member.its_id}</div>
-                      </div>
-                      {updatingMembers.has(member.its_id) && (
-                        <div className="flex items-center space-x-2 px-2 py-1 bg-blue-100 rounded-full">
-                          <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-xs text-blue-700">Updating</span>
+            {familyMembers.map((member) => {
+              const isUpdatingThisMember = updatingMembers.has(member.its_id);
+              return (
+                <Card key={member.its_id} className={`border border-gray-200 shadow-sm ${isUpdatingThisMember ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-sm font-medium text-gray-500">ITS No</div>
+                          <div className="text-base font-semibold text-gray-900">{member.its_id}</div>
                         </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
-                      <div className="text-base font-medium text-gray-900">{member.fullname}</div>
-                    </div>
-                    
-                    <div>
-                      <div className="text-sm font-medium text-gray-500 mb-2">Venue Preference</div>
-                      <div className="space-y-2">
-                        <Select
-                          value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
-                          onValueChange={(value) => handleVenueChange(member.its_id, value)}
-                          disabled={updatingMembers.has(member.its_id)}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Venue" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {passPreferencesData.map((preference) => (
-                              <SelectItem disabled={preference.vaaz_center_availability === 0} key={preference.id} value={preference.id.toString()}>
-                                <div className="flex items-center space-x-2">
-                                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                  <span>{preference.name}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {memberMessages[member.its_id] && (
+                        {isUpdatingThisMember && (
+                          <div className="flex items-center space-x-2 px-2 py-1 bg-blue-100 rounded-full">
+                            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-xs text-blue-700">Updating</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
+                        <div className="text-base font-medium text-gray-900">{member.fullname} ({member.gender})</div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-sm font-medium text-gray-500 mb-2">Venue Preference</div>
+                        <div className="space-y-2">
+                          <Select
+                            value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
+                            onValueChange={(value) => handleVenueChange(member.its_id, value)}
+                            disabled={isUpdatingThisMember}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Venue" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {passPreferencesData.map((preference) => {
+                                let isDisabled = false;
+                                if (member.gender?.toLowerCase() === 'male') {
+                                  isDisabled = preference.male_availability === 0;
+                                } else if (member.gender?.toLowerCase() === 'female') {
+                                  isDisabled = preference.female_availability === 0;
+                                }
+                                return (
+                                  <SelectItem
+                                    key={preference.id}
+                                    value={preference.id.toString()}
+                                    disabled={isDisabled || isUpdatingThisMember}
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`w-2 h-2 rounded-full ${isDisabled ? 'bg-red-500' : 'bg-green-500'}`}></span>
+                                      <span>{preference.name}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                          {memberMessages[member.its_id] && (
                           <div className={`flex items-center space-x-2 text-sm px-3 py-2 rounded-lg ${
                             memberMessages[member.its_id].type === 'success'
                               ? 'bg-green-100 text-green-800 border border-green-200'
@@ -557,10 +588,10 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
+          )}
           </div>
         </CardContent>
       </Card>
     </>
-  );
-}
+)}

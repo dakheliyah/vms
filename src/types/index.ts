@@ -108,10 +108,16 @@ export interface PassPreference {
   vaaz_center_id: number;
   vaaz_center_name: string;
   pass_type: string;
-  name: string;
-  vaaz_center_capacity: number;
-  vaaz_center_issued_passes: number;
-  vaaz_center_availability: number;
+  name: string; // This seems to be the venue name, same as vaaz_center_name based on API
+  vaaz_center_capacity: number; // This is likely total_capacity
+  vaaz_center_issued_passes: number; // This is likely total_issued_passes
+  vaaz_center_availability: number; // This is likely total_availability
+  male_capacity?: number; // Added
+  male_issued_passes?: number; // Added
+  male_availability?: number; // Added
+  female_capacity?: number; // Added
+  female_issued_passes?: number; // Added
+  female_availability?: number; // Added
   blocks: ApiBlock[];
 }
 

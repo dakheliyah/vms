@@ -3,8 +3,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-
-import { Users, Calendar, TrendingUp } from 'lucide-react';
 import DashboardHeader from '@/components/DashboardHeader';
 import { User } from '@/types';
 import useCurrentUser from '@/lib/hooks/useCurrentUser';

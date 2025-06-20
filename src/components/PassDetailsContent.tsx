@@ -329,8 +329,13 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             <li>Mufaddal Centre - MCZ</li>
           </ul>
           <p className='text-sm text-gray-600'>
-            Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey
+            Instructions:
+            {/* Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey */}
           </p>
+          <ul className='text-sm text-gray-600 list-disc pl-6'>
+            <li>Selection is subject to availability of quota.</li>
+            <li>Once this survey is closed your preference cannot be closed.</li>
+          </ul>
         </CardHeader>
         <CardContent className="pt-4">
           {/* Bulk Update Controls */}

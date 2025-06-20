@@ -16,15 +16,17 @@ const useCurrentUser = (): UseCurrentUserReturn => {
 
   const fetchCurrentUser = useCallback(async () => {
     setIsLoading(true);
+    console.log('useCurrentUser fetchCurrentUser');
     setError(null);
     const its_no = localStorage.getItem('its_no');
     if (!its_no) {
       console.error('ITS number not found in localStorage');
       return;
     }
+    console.log('useCurrentUser fetchCurrentUser ITS number:', its_no);
     // TODO: Replace '/users/me' with the actual endpoint from the VMS API documentation
-    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<User>> = await apiClient<ApiResponseData<User>>(`/mumineen/`);
-
+    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<User>> = await apiClient<ApiResponseData<User>>(`/mumineen/${its_no}`);
+    console.log('useCurrentUser fetchCurrentUser responseData:', responseData);
     if (apiError) {
       setError(apiError);
       setUser(null);
@@ -35,6 +37,7 @@ const useCurrentUser = (): UseCurrentUserReturn => {
       setError('User data not found in response.');
       setUser(null);
     }
+    console.log('useCurrentUser fetchCurrentUser user:', user);
     setIsLoading(false);
   }, []);
 

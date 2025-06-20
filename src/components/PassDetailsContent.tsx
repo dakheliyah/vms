@@ -467,7 +467,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                         <Select
                           value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
                           onValueChange={(value) => handleVenueChange(member.its_id, value)}
-                          disabled={isUpdatingThisMember}
+                          disabled={isUpdatingThisMember || member.pass_preferences?.[0]?.is_locked}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select Venue" />

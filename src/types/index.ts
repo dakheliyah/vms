@@ -108,6 +108,7 @@ export interface PassPreference {
   vaaz_center_id: number;
   vaaz_center_name: string;
   pass_type: string;
+  is_locked: boolean;
   name: string; // This seems to be the venue name, same as vaaz_center_name based on API
   vaaz_center_capacity: number; // This is likely total_capacity
   vaaz_center_issued_passes: number; // This is likely total_issued_passes

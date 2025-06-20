@@ -81,7 +81,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen text-foreground">
       {currentUser && <Header user={currentUser} />}
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         {/* <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} /> */}
         <div className="mt-8">
           {renderContent()}

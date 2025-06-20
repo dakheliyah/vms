@@ -88,7 +88,7 @@ export default function DashboardPage() {
 
   if (!currentUser) {
     // TODO: Add a proper loading state or spinner
-    return <div>Loading...</div>;
+    return <div>Loading 03...</div>;
   }
 
   return (

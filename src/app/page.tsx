@@ -29,7 +29,7 @@ export default function Home() {
 
   const renderContent = () => {
     if (loading) {
-      return <div className="text-center py-10">Loading...</div>;
+      return <div className="text-center py-10">Loading 01...</div>;
     }
     if (error) {
       return <div className="text-center py-10 text-red-500">Error: {error}</div>;

@@ -117,7 +117,7 @@ export default function ReportsPage() {
   const [dateFilter, setDateFilter] = useState('all');
 
   // Fetch current user data
-  const { user, isLoading: userLoading, error: userError } = useCurrentUser();
+  const { user, isLoading: userLoading, error: userError, showAccessDenied, countdown } = useCurrentUser();
 
   // Filter and search data - moved before conditional returns to follow Rules of Hooks
   const filteredData = useMemo(() => {

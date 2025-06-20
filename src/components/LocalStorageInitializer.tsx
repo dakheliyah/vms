@@ -11,6 +11,8 @@ const LocalStorageInitializer = () => {
 
         if (response.ok && data.its_no) {
           localStorage.setItem('its_no', data.its_no);
+          // reload the page
+          window.location.reload();
         } else {
           window.location.href = 'https://colombo-relay.asharamubaraka.net/';
         }

@@ -360,12 +360,6 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                   </span>
                 </div>
               </div>
-              {bulkUpdateMode && (
-                <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 rounded-full self-start sm:self-auto">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs font-medium text-blue-700">Active</span>
-                </div>
-              )}
             </div>
             
             {bulkUpdateMode && (
@@ -475,7 +469,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                         </SelectTrigger>
                         <SelectContent>
                           {passPreferencesData.map((preference) => (
-                            <SelectItem key={preference.id} value={preference.id.toString()}>
+                            <SelectItem disabled={preference.vaaz_center_availability === 0} key={preference.id} value={preference.id.toString()}>
                               {preference.name}
                             </SelectItem>
                           ))}
@@ -537,7 +531,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                           </SelectTrigger>
                           <SelectContent>
                             {passPreferencesData.map((preference) => (
-                              <SelectItem key={preference.id} value={preference.id.toString()}>
+                              <SelectItem disabled={preference.vaaz_center_availability === 0} key={preference.id} value={preference.id.toString()}>
                                 <div className="flex items-center space-x-2">
                                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                                   <span>{preference.name}</span>

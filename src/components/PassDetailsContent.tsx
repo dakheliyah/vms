@@ -328,9 +328,10 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             <li>Husaini Masjid Complex - CMZ</li>
             <li>Mufaddal Centre - MCZ</li>
           </ul>
-          <p className='text-sm text-gray-600'>
-            Instructions:
-            {/* Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey */}
+          <p className='text-sm text-gray-600 pt-2'>
+            <b>Instructions: </b>
+            <br />
+            Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey
           </p>
           <ul className='text-sm text-gray-600 list-disc pl-6'>
             <li>Selection is subject to availability of quota.</li>

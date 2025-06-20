@@ -36,8 +36,7 @@ export default function Home() {
               Access Unavailable
             </div>
             <div className="text-red-700 mb-6">
-              This survery is available to mumineen of Sri Lanka only
-              {/* Only mumineen with raza to Colombo Relay Center can access this page. */}
+              Only mumineen with raza to Colombo Relay Center can access this page.
             </div>
             <div className="text-red-600 font-medium">
               Redirecting in {countdown} second{countdown !== 1 ? 's' : ''}...

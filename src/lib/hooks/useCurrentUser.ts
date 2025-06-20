@@ -65,10 +65,13 @@ const useCurrentUser = (): UseCurrentUserReturn => {
   useEffect(() => {
     // Initial fetch attempt
     fetchCurrentUser();
+  }, [fetchCurrentUser]);
 
+  useEffect(() => {
     // Listen for localStorage ready event as backup
     const handleLocalStorageReady = () => {
-      if (!user && !isLoading) {
+      // Only fetch if we don't have user data yet
+      if (!user) {
         fetchCurrentUser();
       }
     };
@@ -78,7 +81,7 @@ const useCurrentUser = (): UseCurrentUserReturn => {
     return () => {
       window.removeEventListener('localStorageReady', handleLocalStorageReady);
     };
-  }, [fetchCurrentUser, user, isLoading]);
+  }, [user]); // Removed fetchCurrentUser to prevent infinite loop
 
   return { user, isLoading, error, refetch: fetchCurrentUser };
 };

@@ -14,36 +14,71 @@ const useCurrentUser = (): UseCurrentUserReturn => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCurrentUser = useCallback(async () => {
-    setIsLoading(true);
-    console.log('useCurrentUser fetchCurrentUser');
-    setError(null);
-    const its_no = localStorage.getItem('its_no');
-    if (!its_no) {
-      console.error('ITS number not found in localStorage');
-      return;
+  // Helper function to wait for localStorage to be available
+  const waitForLocalStorage = useCallback(async (maxAttempts = 10, interval = 100): Promise<string | null> => {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const its_no = localStorage.getItem('its_no');
+      if (its_no) {
+        return its_no;
+      }
+      // Wait before next attempt
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
-    console.log('useCurrentUser fetchCurrentUser ITS number:', its_no);
-    // TODO: Replace '/users/me' with the actual endpoint from the VMS API documentation
-    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<User>> = await apiClient<ApiResponseData<User>>(`/mumineen/${its_no}`);
-    console.log('useCurrentUser fetchCurrentUser responseData:', responseData);
-    if (apiError) {
-      setError(apiError);
-      setUser(null);
-    } else if (responseData && responseData.data) {
-      setUser(responseData.data);
-    } else if (responseData && !responseData.data) {
-      // Handle cases where the outer 'data' exists but the inner 'data' (actual user) is missing
-      setError('User data not found in response.');
-      setUser(null);
-    }
-    console.log('useCurrentUser fetchCurrentUser user:', user);
-    setIsLoading(false);
+    return null;
   }, []);
 
+  const fetchCurrentUser = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Wait for localStorage to be set by LocalStorageInitializer
+      const its_no = await waitForLocalStorage();
+      
+      if (!its_no) {
+        setError('ITS number not found in localStorage after waiting');
+        setIsLoading(false);
+        return;
+      }
+
+      // TODO: Replace '/users/me' with the actual endpoint from the VMS API documentation
+      const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<User>> = await apiClient<ApiResponseData<User>>(`/mumineen/`);
+
+      if (apiError) {
+        setError(apiError);
+        setUser(null);
+      } else if (responseData && responseData.data) {
+        setUser(responseData.data);
+      } else if (responseData && !responseData.data) {
+        // Handle cases where the outer 'data' exists but the inner 'data' (actual user) is missing
+        setError('User data not found in response.');
+        setUser(null);
+      }
+    } catch (err) {
+      setError('Failed to fetch user data');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [waitForLocalStorage]);
+
   useEffect(() => {
+    // Initial fetch attempt
     fetchCurrentUser();
-  }, [fetchCurrentUser]);
+
+    // Listen for localStorage ready event as backup
+    const handleLocalStorageReady = () => {
+      if (!user && !isLoading) {
+        fetchCurrentUser();
+      }
+    };
+
+    window.addEventListener('localStorageReady', handleLocalStorageReady);
+
+    return () => {
+      window.removeEventListener('localStorageReady', handleLocalStorageReady);
+    };
+  }, [fetchCurrentUser, user, isLoading]);
 
   return { user, isLoading, error, refetch: fetchCurrentUser };
 };

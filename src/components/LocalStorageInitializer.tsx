@@ -11,6 +11,8 @@ const LocalStorageInitializer = () => {
 
         if (response.ok && data.its_no) {
           localStorage.setItem('its_no', data.its_no);
+          // Dispatch custom event to notify that localStorage is ready
+          window.dispatchEvent(new CustomEvent('localStorageReady', { detail: { its_no: data.its_no } }));
         } else {
           window.location.href = 'https://colombo-relay.asharamubaraka.net/';
         }

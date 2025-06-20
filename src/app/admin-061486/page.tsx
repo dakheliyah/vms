@@ -41,6 +41,10 @@ export default function AdminPage() {
   const [allocationGender, setAllocationGender] = useState<'male' | 'female'>('male');
   const [allocationVenue, setAllocationVenue] = useState<'cmz' | 'mcz'>('cmz');
 
+  // Import users states
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Dummy data for demonstration
@@ -215,6 +219,71 @@ export default function AdminPage() {
     }
   };
 
+  const handleImportUsers = async () => {
+    if (!selectedFile) {
+      alert('Please select a CSV file to import');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const its_no = localStorage.getItem('its_no');
+      
+      // Create FormData to send the file
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Make API call
+      const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/bulk', {
+        method: 'POST',
+        headers: {
+          'Token': `${its_no}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Import API response:', result);
+      
+      // Reset form and close modal
+      setSelectedFile(null);
+      setShowImportModal(false);
+      
+      alert('Users imported successfully!');
+      
+    } catch (error) {
+      console.error('Error importing users:', error);
+      alert('Error importing users. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setSelectedFile(file);
+    } else {
+      alert('Please select a valid CSV file');
+      event.target.value = '';
+    }
+  };
+
+  const downloadSampleCSV = () => {
+    // Create a link to download the sample CSV from the root folder
+    const link = document.createElement('a');
+    link.href = '/sample_csv.csv';
+    link.download = 'sample_csv.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -297,7 +366,10 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Button className="justify-center h-20 text-sm bg-white hover:bg-[#FFF6E7] text-[#23476B] border-[#D9C9AD] shadow-sm flex-col">
+                <Button 
+                  className="justify-center h-20 text-sm bg-white hover:bg-[#FFF6E7] text-[#23476B] border-[#D9C9AD] shadow-sm flex-col"
+                  onClick={() => setShowImportModal(true)}
+                >
                   <div className="p-2 bg-[#D9C9AD] rounded-lg mb-2">
                     <Upload className="w-5 h-5 text-[#23476B]" />
                   </div>
@@ -673,6 +745,93 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   'Allocate Users'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Users Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">Import Users</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowImportModal(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  CSV File
+                </label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isSubmitting}
+                />
+                {selectedFile && (
+                  <p className="text-sm text-green-600 mt-2">
+                    Selected: {selectedFile.name}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Please select a CSV file containing user data
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-900">Need a sample format?</h4>
+                    <p className="text-xs text-blue-700 mt-1">Download our sample CSV to see the required format</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadSampleCSV}
+                    className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                  >
+                    <Download className="w-4 h-4 mr-1" />
+                    Sample CSV
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+              <Button
+                variant="outline"
+                onClick={() => setShowImportModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleImportUsers}
+                disabled={isSubmitting || !selectedFile}
+                className="min-w-[100px]"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Importing...
+                  </div>
+                ) : (
+                  'Import Users'
                 )}
               </Button>
             </div>

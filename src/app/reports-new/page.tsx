@@ -7,8 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // For potential filters
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Download } from 'lucide-react';
 import useCurrentUser from '@/lib/hooks/useCurrentUser'; // Re-using for consistency if user context is needed
+import Papa from 'papaparse';
 
 // Define the type for the API response data
 interface ReportData {
@@ -59,9 +62,40 @@ export default function ReportsNewPage() {
   const [filterCountry, setFilterCountry] = useState('');
   const [filterGender, setFilterGender] = useState('');
   const [filterVaazCenter, setFilterVaazCenter] = useState(''); // New filter state
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([
+    'its_id', 'fullname', 'gender', 'age', 'country', 'jamaat', 'vaaz_center'
+  ]);
 
   // Consistent user fetching, though not directly used for data display yet
   const { user: currentUser, isLoading: userLoading, error: userError } = useCurrentUser();
+
+  // Available columns for export
+  const availableColumns = [
+    { key: 'its_id', label: 'ITS ID' },
+    { key: 'fullname', label: 'Full Name' },
+    { key: 'gender', label: 'Gender' },
+    { key: 'age', label: 'Age' },
+    { key: 'country', label: 'Country' },
+    { key: 'jamaat', label: 'Jamaat' },
+    { key: 'vaaz_center', label: 'Vaaz Center' },
+    { key: 'mobile', label: 'Mobile' },
+    { key: 'idara', label: 'Idara' },
+    { key: 'category', label: 'Category' },
+    { key: 'prefix', label: 'Prefix' },
+    { key: 'title', label: 'Title' },
+    { key: 'venue_waaz', label: 'Venue Waaz' },
+    { key: 'city', label: 'City' },
+    { key: 'local_mehman', label: 'Local Mehman' },
+    { key: 'arr_place_date', label: 'Arrival Place Date' },
+    { key: 'flight_code', label: 'Flight Code' },
+    { key: 'whatsapp_link_clicked', label: 'WhatsApp Link Clicked' },
+    { key: 'daily_trans', label: 'Daily Trans' },
+    { key: 'acc_arranged_at', label: 'Accommodation Arranged At' },
+    { key: 'acc_zone', label: 'Accommodation Zone' },
+    { key: 'created_at', label: 'Created At' },
+    { key: 'updated_at', label: 'Updated At' }
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +109,7 @@ export default function ReportsNewPage() {
         // Add header token to this
         const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/pass-preference/breakdown?event_id=1', {
             headers: {
-                'Token': user || ''
+                'Token': user || '',
             }
         }); // Using relative path for API route
         if (!response.ok) {
@@ -167,6 +201,106 @@ export default function ReportsNewPage() {
     return stats;
   }, [data]);
 
+  const handleColumnToggle = (columnKey: string) => {
+    setSelectedColumns(prev => 
+      prev.includes(columnKey) 
+        ? prev.filter(col => col !== columnKey)
+        : [...prev, columnKey]
+    );
+  };
+
+  const exportToCSV = () => {
+    const exportData = filteredData.map(item => {
+      const row: any = {};
+      selectedColumns.forEach(column => {
+        switch (column) {
+          case 'its_id':
+            row['ITS ID'] = item.its_id;
+            break;
+          case 'fullname':
+            row['Full Name'] = item.fullname;
+            break;
+          case 'gender':
+            row['Gender'] = item.gender;
+            break;
+          case 'age':
+            row['Age'] = item.age;
+            break;
+          case 'country':
+            row['Country'] = item.country;
+            break;
+          case 'jamaat':
+            row['Jamaat'] = item.jamaat;
+            break;
+          case 'vaaz_center':
+            row['Vaaz Center'] = item.pass_preferences?.[0]?.vaaz_center_name || 'N/A';
+            break;
+          case 'mobile':
+            row['Mobile'] = item.mobile || 'N/A';
+            break;
+          case 'idara':
+            row['Idara'] = item.idara || 'N/A';
+            break;
+          case 'category':
+            row['Category'] = item.category || 'N/A';
+            break;
+          case 'prefix':
+            row['Prefix'] = item.prefix || 'N/A';
+            break;
+          case 'title':
+            row['Title'] = item.title || 'N/A';
+            break;
+          case 'venue_waaz':
+            row['Venue Waaz'] = item.venue_waaz || 'N/A';
+            break;
+          case 'city':
+            row['City'] = item.city || 'N/A';
+            break;
+          case 'local_mehman':
+            row['Local Mehman'] = item.local_mehman ? 'Yes' : 'No';
+            break;
+          case 'arr_place_date':
+            row['Arrival Place Date'] = item.arr_place_date || 'N/A';
+            break;
+          case 'flight_code':
+            row['Flight Code'] = item.flight_code || 'N/A';
+            break;
+          case 'whatsapp_link_clicked':
+            row['WhatsApp Link Clicked'] = item.whatsapp_link_clicked ? 'Yes' : 'No';
+            break;
+          case 'daily_trans':
+            row['Daily Trans'] = item.daily_trans ? 'Yes' : 'No';
+            break;
+          case 'acc_arranged_at':
+            row['Accommodation Arranged At'] = item.acc_arranged_at || 'N/A';
+            break;
+          case 'acc_zone':
+            row['Accommodation Zone'] = item.acc_zone || 'N/A';
+            break;
+          case 'created_at':
+            row['Created At'] = new Date(item.created_at).toLocaleDateString();
+            break;
+          case 'updated_at':
+            row['Updated At'] = new Date(item.updated_at).toLocaleDateString();
+            break;
+        }
+      });
+      return row;
+    });
+
+    const csv = Papa.unparse(exportData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `pass-preference-report-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportDialog(false);
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -243,45 +377,98 @@ export default function ReportsNewPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Input 
-              placeholder="Search by Name or ITS ID..."
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="lg:col-span-1"
-            />
-            <Select value={filterCountry} onValueChange={(value) => { setFilterCountry(value === 'all' ? '' : value); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {uniqueCountries.map(country => (
-                  <SelectItem key={country} value={country}>{country}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterGender} onValueChange={(value) => { setFilterGender(value === 'all' ? '' : value); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Genders</SelectItem>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterVaazCenter} onValueChange={(value) => { setFilterVaazCenter(value === 'all' ? '' : value); setCurrentPage(1); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Vaaz Center" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Vaaz Centers</SelectItem>
-                <SelectItem value="MCZ - Mufaddal Centre">MCZ - Mufaddal Centre</SelectItem>
-                <SelectItem value="CMZ - Central Masjid Zone">CMZ - Central Masjid Zone</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex justify-between items-center mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+              <Input 
+                placeholder="Search by Name or ITS ID..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                className="lg:col-span-1"
+              />
+              <Select value={filterCountry} onValueChange={(value) => { setFilterCountry(value === 'all' ? '' : value); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by Country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Countries</SelectItem>
+                  {uniqueCountries.map(country => (
+                    <SelectItem key={country} value={country}>{country}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterGender} onValueChange={(value) => { setFilterGender(value === 'all' ? '' : value); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genders</SelectItem>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterVaazCenter} onValueChange={(value) => { setFilterVaazCenter(value === 'all' ? '' : value); setCurrentPage(1); }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by Vaaz Center" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Vaaz Centers</SelectItem>
+                  <SelectItem value="MCZ - Mufaddal Centre">MCZ - Mufaddal Centre</SelectItem>
+                  <SelectItem value="CMZ - Central Masjid Zone">CMZ - Central Masjid Zone</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="ml-4">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Select Columns to Export</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {availableColumns.map(column => (
+                      <div key={column.key} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={column.key}
+                          checked={selectedColumns.includes(column.key)}
+                          onCheckedChange={() => handleColumnToggle(column.key)}
+                        />
+                        <label htmlFor={column.key} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          {column.label}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedColumns(availableColumns.map(col => col.key))}
+                    >
+                      Select All
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedColumns([])}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                  <Button 
+                    onClick={exportToCSV} 
+                    disabled={selectedColumns.length === 0}
+                    className="w-full"
+                  >
+                    Download CSV ({selectedColumns.length} columns)
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
+
 
           {loading && (
             <div className="text-center py-10">

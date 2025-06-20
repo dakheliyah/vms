@@ -135,13 +135,11 @@ export default function ReportsNewPage() {
       byVenue: {} as Record<string, number>,
       byGender: {
         male: 0,
-        female: 0,
-        other: 0
+        female: 0
       },
       byVenueAndGender: {} as Record<string, {
         male: number,
-        female: number,
-        other: number
+        female: number
       }>
     };
 
@@ -151,18 +149,19 @@ export default function ReportsNewPage() {
       stats.byVenue[venueName] = (stats.byVenue[venueName] || 0) + 1;
 
       // Gender stats
-      const genderKey = item.gender.toLowerCase() as 'male' | 'female' | 'other';
-      stats.byGender[genderKey] = (stats.byGender[genderKey] || 0) + 1;
+      const genderKey = item.gender.toLowerCase() as 'male' | 'female';
+      if (genderKey === 'male' || genderKey === 'female') {
+        stats.byGender[genderKey] = (stats.byGender[genderKey] || 0) + 1;
 
-      // Venue and Gender combined stats
-      if (!stats.byVenueAndGender[venueName]) {
-        stats.byVenueAndGender[venueName] = {
-          male: 0,
-          female: 0,
-          other: 0
-        };
+        // Venue and Gender combined stats
+        if (!stats.byVenueAndGender[venueName]) {
+          stats.byVenueAndGender[venueName] = {
+            male: 0,
+            female: 0
+          };
+        }
+        stats.byVenueAndGender[venueName][genderKey]++;
       }
-      stats.byVenueAndGender[venueName][genderKey]++;
     });
 
     return stats;
@@ -270,7 +269,6 @@ export default function ReportsNewPage() {
                 <SelectItem value="all">All Genders</SelectItem>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem> 
               </SelectContent>
             </Select>
             <Select value={filterVaazCenter} onValueChange={(value) => { setFilterVaazCenter(value === 'all' ? '' : value); setCurrentPage(1); }}>

@@ -9,6 +9,7 @@ import DashboardHeader from '@/components/DashboardHeader';
 import { User } from '@/types';
 import useCurrentUser from '@/lib/hooks/useCurrentUser';
 import { apiClient, ApiResponse } from '@/lib/api/apiClient';
+import Footer from '@/components/Footer';
 
 // Pass preference breakdown data types
 interface PassPreference {

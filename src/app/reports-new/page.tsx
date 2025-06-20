@@ -129,6 +129,45 @@ export default function ReportsNewPage() {
     return Array.from(countries).sort();
   }, [data]);
 
+  const venueStats = useMemo(() => {
+    const stats = {
+      total: data.length,
+      byVenue: {} as Record<string, number>,
+      byGender: {
+        male: 0,
+        female: 0,
+        other: 0
+      },
+      byVenueAndGender: {} as Record<string, {
+        male: number,
+        female: number,
+        other: number
+      }>
+    };
+
+    data.forEach(item => {
+      // Venue stats
+      const venueName = item.pass_preferences?.[0]?.vaaz_center_name || 'Unassigned';
+      stats.byVenue[venueName] = (stats.byVenue[venueName] || 0) + 1;
+
+      // Gender stats
+      const genderKey = item.gender.toLowerCase() as 'male' | 'female' | 'other';
+      stats.byGender[genderKey] = (stats.byGender[genderKey] || 0) + 1;
+
+      // Venue and Gender combined stats
+      if (!stats.byVenueAndGender[venueName]) {
+        stats.byVenueAndGender[venueName] = {
+          male: 0,
+          female: 0,
+          other: 0
+        };
+      }
+      stats.byVenueAndGender[venueName][genderKey]++;
+    });
+
+    return stats;
+  }, [data]);
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -168,6 +207,42 @@ export default function ReportsNewPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold mb-6 text-primary-green">Pass Preference Breakdown Report</h2>
+          
+          {/* Stats Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Venue Statistics</h3>
+              <div className="space-y-2">
+                {Object.entries(venueStats.byVenue).map(([venue, count]) => (
+                  <div key={venue}>
+                    <div className="flex justify-between mb-1">
+                      <span className="font-medium">{venue}:</span>
+                      <span className="font-semibold">{count}</span>
+                    </div>
+                    <div className="pl-4 text-sm space-y-1">
+                      {Object.entries(venueStats.byVenueAndGender[venue] || {}).map(([gender, genderCount]) => (
+                        <div key={`${venue}-${gender}`} className="flex justify-between text-gray-600">
+                          <span className="capitalize">{gender}:</span>
+                          <span>{genderCount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Overall Gender Distribution</h3>
+              <div className="space-y-2">
+                {Object.entries(venueStats.byGender).map(([gender, count]) => (
+                  <div key={gender} className="flex justify-between">
+                    <span className="capitalize">{gender}:</span>
+                    <span className="font-semibold">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Input 

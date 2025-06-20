@@ -343,16 +343,20 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <input
-                    type="checkbox"
+                  <button
+                    type="button"
                     id="bulkMode"
-                    checked={bulkUpdateMode}
-                    onChange={(e) => setBulkUpdateMode(e.target.checked)}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all duration-200 relative z-10"
-                  />
-                  {bulkUpdateMode && (
-                    <div className="absolute inset-0 bg-blue-600 rounded opacity-20 animate-pulse pointer-events-none"></div>
-                  )}
+                    onClick={() => setBulkUpdateMode(!bulkUpdateMode)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      bulkUpdateMode ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                        bulkUpdateMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor="bulkMode" className="text-sm md:text-base font-semibold text-gray-800 cursor-pointer">

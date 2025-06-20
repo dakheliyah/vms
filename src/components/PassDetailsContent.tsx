@@ -91,11 +91,13 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
 
   /**
    * Handles updating venue preferences for one or more family members
-   * Uses POST for new preferences and PUT for updating existing ones
+   * Uses POST for new preferences and PUT for updating existing ones (individual updates)
+   * For bulk updates, always uses PUT
    * @param updates - Single update object or array of update objects
+   * @param isBulkUpdate - Whether this is a bulk update (always uses PUT)
    * @returns Promise<boolean> - Returns true if successful, false if failed
    */
-  const handleVenueUpdate = async (updates: VenueUpdate | VenueUpdate[]): Promise<boolean> => {
+  const handleVenueUpdate = async (updates: VenueUpdate | VenueUpdate[], isBulkUpdate: boolean = false): Promise<boolean> => {
     const updateArray = Array.isArray(updates) ? updates : [updates];
     
     // Add all member IDs to updating state
@@ -108,47 +110,60 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
     const its_no = localStorage.getItem('its_no');
     
     try {
-      // Group updates by whether they are new or existing preferences
-      const newPreferences: VenueUpdate[] = [];
-      const existingPreferences: VenueUpdate[] = [];
-      
-      updateArray.forEach(update => {
-        const member = familyMembers.find(m => m.its_id === update.its_id);
-        const hasExistingPreference = member?.pass_preferences && member.pass_preferences.length > 0;
-        
-        if (hasExistingPreference) {
-          existingPreferences.push(update);
-        } else {
-          newPreferences.push(update);
-        }
-      });
-      
       const promises = [];
       
-      // Handle new preferences with POST
-      if (newPreferences.length > 0) {
-        const postPromise = fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Token': its_no || '',
-          },
-          body: JSON.stringify(newPreferences),
-        });
-        promises.push(postPromise);
-      }
-      
-      // Handle existing preferences with PUT
-      if (existingPreferences.length > 0) {
+      if (isBulkUpdate) {
+        // For bulk updates, always use PUT
         const putPromise = fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Token': its_no || '',
           },
-          body: JSON.stringify(existingPreferences),
+          body: JSON.stringify(updateArray),
         });
         promises.push(putPromise);
+      } else {
+        // For individual updates, group by whether they are new or existing preferences
+        const newPreferences: VenueUpdate[] = [];
+        const existingPreferences: VenueUpdate[] = [];
+        
+        updateArray.forEach(update => {
+          const member = familyMembers.find(m => m.its_id === update.its_id);
+          const hasExistingPreference = member?.pass_preferences && member.pass_preferences.length > 0;
+          
+          if (hasExistingPreference) {
+            existingPreferences.push(update);
+          } else {
+            newPreferences.push(update);
+          }
+        });
+        
+        // Handle new preferences with POST
+        if (newPreferences.length > 0) {
+          const postPromise = fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Token': its_no || '',
+            },
+            body: JSON.stringify(newPreferences),
+          });
+          promises.push(postPromise);
+        }
+        
+        // Handle existing preferences with PUT
+        if (existingPreferences.length > 0) {
+          const putPromise = fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Token': its_no || '',
+            },
+            body: JSON.stringify(existingPreferences),
+          });
+          promises.push(putPromise);
+        }
       }
       
       // Execute all requests
@@ -166,14 +181,14 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
       
       // Set success messages
       const totalUpdates = updateArray.length;
-      const newCount = newPreferences.length;
-      const updateCount = existingPreferences.length;
       const timestamp = Date.now();
       
       if (totalUpdates === 1) {
         // Individual update
         const memberId = updateArray[0].its_id;
-        const message = newCount > 0 ? 'Venue preference set successfully!' : 'Venue preference updated successfully!';
+        const member = familyMembers.find(m => m.its_id === memberId);
+        const hasExistingPreference = member?.pass_preferences && member.pass_preferences.length > 0;
+        const message = hasExistingPreference ? 'Venue preference updated successfully!' : 'Venue preference set successfully!';
         setMemberMessages(prev => ({
           ...prev,
           [memberId]: { type: 'success', message, timestamp }
@@ -182,10 +197,19 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
         toast.success(message);
       } else {
         // Bulk update
-        const parts = [];
-        if (newCount > 0) parts.push(`${newCount} new preference${newCount > 1 ? 's' : ''} set`);
-        if (updateCount > 0) parts.push(`${updateCount} preference${updateCount > 1 ? 's' : ''} updated`);
-        const message = parts.join(' and ') + ' successfully!';
+        const message = isBulkUpdate 
+          ? `All ${totalUpdates} member preferences updated successfully!`
+          : (() => {
+              const newCount = updateArray.filter(update => {
+                const member = familyMembers.find(m => m.its_id === update.its_id);
+                return !(member?.pass_preferences && member.pass_preferences.length > 0);
+              }).length;
+              const updateCount = totalUpdates - newCount;
+              const parts = [];
+              if (newCount > 0) parts.push(`${newCount} new preference${newCount > 1 ? 's' : ''} set`);
+              if (updateCount > 0) parts.push(`${updateCount} preference${updateCount > 1 ? 's' : ''} updated`);
+              return parts.join(' and ') + ' successfully!';
+            })();
         setBulkMessage({ type: 'success', message, timestamp });
         clearMessageAfterTimeout();
         toast.success(message);
@@ -264,7 +288,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
     }));
     
     // Send batch update to API
-    const success = await handleVenueUpdate(updates);
+    const success = await handleVenueUpdate(updates, true);
     
     // Only update local state if API call was successful
     if (success) {
@@ -293,7 +317,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
     }));
 
     // Send bulk update to API
-    const success = await handleVenueUpdate(updates);
+    const success = await handleVenueUpdate(updates, true);
     
     // Only update local state and reset bulk mode if API call was successful
     if (success) {
@@ -553,7 +577,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                           <Select
                             value={memberPassSelections[member.its_id]?.venueId?.toString() || member.pass_preferences?.[0]?.vaaz_center_id?.toString() || ''}
                             onValueChange={(value) => handleVenueChange(member.its_id, value)}
-                            disabled={isUpdatingThisMember}
+                            disabled={isUpdatingThisMember || member.pass_preferences?.[0]?.is_locked}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select Venue" />

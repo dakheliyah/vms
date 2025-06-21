@@ -349,7 +349,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
             Mumineen with Raza for Colombo Relay Centre can choose their preferred Waaz Centre from two available options.
           </p>
           <ul className='list-disc pl-6 text-sm text-gray-600'>
-            <li>Husaini Masjid Complex - CMZ</li>
+            <li>Central Masjid Zone - CMZ</li>
             <li>Mufaddal Centre - MCZ</li>
           </ul>
           <p className='text-sm text-gray-600 pt-2'>

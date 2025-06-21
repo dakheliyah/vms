@@ -10,6 +10,23 @@ interface DashboardHeaderProps {
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.clear();
+    
+    // Clear all cookies
+    document.cookie.split(";").forEach((c) => {
+      const eqPos = c.indexOf("=");
+      const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname.split('.').slice(-2).join('.');
+    });
+    
+    // Redirect to colombo-relay site
+    window.location.href = 'https://colombo-relay.asharamubaraka.net/';
+  };
+
   return (
     <header className="bg-primary text-white shadow-lg">
       <div className="container mx-auto px-4 py-3">
@@ -28,10 +45,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 Ashara Mubaraka 1447H
               </h1>
             </div>
-            <a href='https://colombo-relay.asharamubaraka.net/' className="text-xs flex items-center text-white px-2 py-1 rounded-md bg-white/10">
-              <HomeIcon className="h-3 w-3 mr-1" />
-              Home
-            </a>
+            <button onClick={handleLogout} className="text-xs flex items-center text-white px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+              <LogOut className="h-3 w-3 mr-1" />
+              Logout
+            </button>
           </div>
           
           {/* Bottom Row - User Info */}
@@ -59,10 +76,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <div className="text-sm opacity-90">
               {user.its_id} | {user.fullname}
             </div>
-            <a href='https://colombo-relay.asharamubaraka.net/' className="text-sm flex gap-1 items-center text-white px-2 py-1 rounded-md hover:bg-white/10 transition-colors">
-              <HomeIcon className="h-4 w-4 mr-1" />
-              Back to Home
-            </a>
+            <button onClick={handleLogout} className="text-sm flex gap-1 items-center text-white px-2 py-1 rounded-md hover:bg-white/10 transition-colors">
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </button>
           </div>
         </div>
       </div>

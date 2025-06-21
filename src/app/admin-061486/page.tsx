@@ -34,12 +34,14 @@ export default function AdminPage() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkItsNumbers, setBulkItsNumbers] = useState('');  
   const [bulkLockAction, setBulkLockAction] = useState<'lock' | 'unlock'>('lock');
+  const [bulkLockReason, setBulkLockReason] = useState('');
   
   // Bulk allocation states
   const [showBulkAllocationModal, setShowBulkAllocationModal] = useState(false);
   const [allocationItsNumbers, setAllocationItsNumbers] = useState('');
   const [allocationGender, setAllocationGender] = useState<'male' | 'female'>('male');
   const [allocationVenue, setAllocationVenue] = useState<'cmz' | 'mcz'>('cmz');
+  const [allocationReason, setAllocationReason] = useState('');
 
   // Import users states
   const [showImportModal, setShowImportModal] = useState(false);
@@ -78,6 +80,11 @@ export default function AdminPage() {
       return;
     }
 
+    if (!bulkLockReason.trim()) {
+      alert('Please enter a reason for this action');
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -107,7 +114,8 @@ export default function AdminPage() {
       // Prepare API payload
       const payload = {
         its_ids: itsNumbersArray,
-        is_locked: bulkLockAction === 'lock'
+        is_locked: bulkLockAction === 'lock',
+        reason: bulkLockReason.trim()
       };
 
       const its_no = localStorage.getItem('its_no');
@@ -132,6 +140,7 @@ export default function AdminPage() {
       // Reset form and close modal
       setBulkItsNumbers('');
       setBulkLockAction('lock');
+      setBulkLockReason('');
       setShowBulkModal(false);
       
       alert(`Successfully ${bulkLockAction}ed ${itsNumbersArray.length} users`);
@@ -147,6 +156,11 @@ export default function AdminPage() {
   const handleBulkAllocationSubmit = async () => {
     if (!allocationItsNumbers.trim()) {
       alert('Please enter at least one ITS number');
+      return;
+    }
+
+    if (!allocationReason.trim()) {
+      alert('Please enter a reason for this allocation');
       return;
     }
 
@@ -181,7 +195,8 @@ export default function AdminPage() {
         event_id: 1,
         vaaz_center_id: allocationVenue === 'cmz' ? 1 : 2,
         its_ids: itsNumbersArray,
-        gender: allocationGender
+        gender: allocationGender,
+        reason: allocationReason.trim()
       };
 
       const its_id = localStorage.getItem('its_no');
@@ -207,6 +222,7 @@ export default function AdminPage() {
       setAllocationItsNumbers('');
       setAllocationGender('male');
       setAllocationVenue('cmz');
+      setAllocationReason('');
       setShowBulkAllocationModal(false);
       
       alert(`Successfully allocated ${itsNumbersArray.length} users to ${allocationVenue.toUpperCase()}`);
@@ -618,6 +634,22 @@ export default function AdminPage() {
                 </Select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={bulkLockReason}
+                  onChange={(e) => setBulkLockReason(e.target.value)}
+                  placeholder="Enter reason for this action"
+                  disabled={isSubmitting}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Please provide a reason for this bulk operation
+                </p>
+              </div>
+
 
 
             </div>
@@ -633,7 +665,7 @@ export default function AdminPage() {
               </Button>
               <Button
                 onClick={handleBulkLockSubmit}
-                disabled={isSubmitting || !bulkItsNumbers.trim()}
+                disabled={isSubmitting || !bulkItsNumbers.trim() || !bulkLockReason.trim()}
                 className="min-w-[100px]"
               >
                 {isSubmitting ? (
@@ -722,6 +754,22 @@ export default function AdminPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={allocationReason}
+                  onChange={(e) => setAllocationReason(e.target.value)}
+                  placeholder="Enter reason for this allocation"
+                  disabled={isSubmitting}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Please provide a reason for this bulk allocation
+                </p>
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -735,7 +783,7 @@ export default function AdminPage() {
               </Button>
               <Button
                 onClick={handleBulkAllocationSubmit}
-                disabled={isSubmitting || !allocationItsNumbers.trim()}
+                disabled={isSubmitting || !allocationItsNumbers.trim() || !allocationReason.trim()}
                 className="min-w-[100px]"
               >
                 {isSubmitting ? (

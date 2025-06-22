@@ -339,7 +339,7 @@ export default function ReportsNewPage() {
       {renderHeader()}
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6 text-primary-green">Pass Preference Breakdown Report</h2>
+          <h2 className="text-2xl font-semibold mb-6 text-primary-green">Pass Preference Breakdown Report {currentUser?.its_id}</h2>
           
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -417,6 +417,7 @@ export default function ReportsNewPage() {
                 </SelectContent>
               </Select>
             </div>
+            {currentUser?.its_id == '30361114' || currentUser?.its_id == '30361286' || currentUser?.its_id == '30359366' || currentUser?.its_id == '30362306' ? (
             <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="ml-4">
@@ -467,6 +468,9 @@ export default function ReportsNewPage() {
                 </div>
               </DialogContent>
             </Dialog>
+            ) : (
+              null
+            )}
           </div>
 
 

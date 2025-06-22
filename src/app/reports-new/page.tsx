@@ -62,6 +62,7 @@ export default function ReportsNewPage() {
   const [filterCountry, setFilterCountry] = useState('');
   const [filterGender, setFilterGender] = useState('');
   const [filterVaazCenter, setFilterVaazCenter] = useState(''); // New filter state
+  const [filterAge, setFilterAge] = useState('');
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([
     'its_id', 'fullname', 'gender', 'age', 'country', 'jamaat', 'vaaz_center'
@@ -149,8 +150,19 @@ export default function ReportsNewPage() {
       )
       .filter(item => filterCountry ? item.country === filterCountry : true)
       .filter(item => filterGender ? item.gender === filterGender : true)
-      .filter(item => filterVaazCenter ? (item.pass_preferences && item.pass_preferences[0]?.vaaz_center_name === filterVaazCenter) : true); // Filter by vaaz_center_name
-  }, [data, searchTerm, filterCountry, filterGender, filterVaazCenter]);
+      .filter(item => {
+        if (!filterVaazCenter) return true;
+        const vaazCenter = item.pass_preferences?.[0]?.vaaz_center_name;
+        if (filterVaazCenter === 'N/A') {
+          return !vaazCenter;
+        }
+        return vaazCenter === filterVaazCenter;
+      })
+      .filter(item => {
+        if (!filterAge) return true;
+        return item.age.toString().includes(filterAge);
+      });
+  }, [data, searchTerm, filterCountry, filterGender, filterVaazCenter, filterAge]);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = useMemo(() => {
@@ -161,6 +173,19 @@ export default function ReportsNewPage() {
   const uniqueCountries = useMemo(() => {
     const countries = new Set(data.map(item => item.country));
     return Array.from(countries).sort();
+  }, [data]);
+
+  const uniqueVaazCenters = useMemo(() => {
+    const vaazCenters = new Set<string>();
+    data.forEach(item => {
+      const vaazCenter = item.pass_preferences?.[0]?.vaaz_center_name;
+      if (vaazCenter) {
+        vaazCenters.add(vaazCenter);
+      } else {
+        vaazCenters.add('N/A');
+      }
+    });
+    return Array.from(vaazCenters).sort();
   }, [data]);
 
   const venueStats = useMemo(() => {
@@ -378,12 +403,19 @@ export default function ReportsNewPage() {
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 flex-1">
               <Input 
                 placeholder="Search by Name or ITS ID..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 className="lg:col-span-1"
+              />
+              <Input 
+                placeholder="Filter by Age..."
+                value={filterAge}
+                onChange={(e) => { setFilterAge(e.target.value); setCurrentPage(1); }}
+                className="lg:col-span-1"
+                type="number"
               />
               <Select value={filterCountry} onValueChange={(value) => { setFilterCountry(value === 'all' ? '' : value); setCurrentPage(1); }}>
                 <SelectTrigger className="w-full">
@@ -412,8 +444,9 @@ export default function ReportsNewPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Vaaz Centers</SelectItem>
-                  <SelectItem value="MCZ - Mufaddal Centre">MCZ - Mufaddal Centre</SelectItem>
-                  <SelectItem value="CMZ - Central Masjid Zone">CMZ - Central Masjid Zone</SelectItem>
+                  {uniqueVaazCenters.map(vaazCenter => (
+                    <SelectItem key={vaazCenter} value={vaazCenter}>{vaazCenter}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

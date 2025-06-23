@@ -10,6 +10,7 @@ import PassDetailsContent from '@/components/PassDetailsContent';
 import AccommodationDetailsContent from '@/components/AccommodationDetailsContent';
 import ArrivalDetailsContent from '@/components/ArrivalDetailsContent'; // Added new component
 import { User } from '@/types'; // Assuming User type is defined in @/types
+import PehliRaatContent from '@/components/PehliRaatContent';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('dashboard'); // Default to dashboard
@@ -73,7 +74,7 @@ export default function Home() {
       // case 'arrival-details': // Added case for new tab
       //   return <ArrivalDetailsContent currentUser={currentUser} />;
       default:
-        return <HomeDashboardContent currentUser={currentUser} />;
+        return <PassDetailsContent currentUser={currentUser} />;
     }
   };
 

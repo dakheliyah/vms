@@ -9,7 +9,7 @@ interface UseFamilyMembersReturn {
   refetch: () => void;
 }
 
-const useFamilyMembers = (): UseFamilyMembersReturn => {
+const useFamilyMembers = (eventId: number = 1): UseFamilyMembersReturn => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ const useFamilyMembers = (): UseFamilyMembersReturn => {
       return;
     }
     // TODO: Replace '/family-members' with the actual endpoint from the VMS API documentation
-    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<FamilyMember[]>> = await apiClient<ApiResponseData<FamilyMember[]>>(`/mumineen/family-by-its-id?event_id=1`);
+    const { data: responseData, error: apiError }: ApiResponse<ApiResponseData<FamilyMember[]>> = await apiClient<ApiResponseData<FamilyMember[]>>(`/mumineen/family-by-its-id?event_id=${eventId}`);
 
     if (apiError) {
       setError(apiError);
@@ -36,7 +36,7 @@ const useFamilyMembers = (): UseFamilyMembersReturn => {
       setFamilyMembers([]);
     }
     setIsLoading(false);
-  }, []);
+  }, [eventId]);
 
   useEffect(() => {
     fetchFamilyMembers();

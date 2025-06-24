@@ -19,7 +19,7 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
   // Track attendance selection for family members (3 = attending, 4 = not attending)
   const [memberAttendance, setMemberAttendance] = useState<Record<number, number>>({});
   const [updatingMembers, setUpdatingMembers] = useState<Set<number>>(new Set()); // Track multiple updating members
-  
+
   // Message states for success/error feedback
   const [memberMessages, setMemberMessages] = useState<Record<number, { type: 'success' | 'error'; message: string; timestamp: number }>>({});
 
@@ -27,9 +27,9 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
   const handleAttendanceChange = async (memberId: number, vaazCenterId: number) => {
     // Add member to updating state
     setUpdatingMembers(prev => new Set(prev).add(memberId));
-    
+
     const its_no = localStorage.getItem('its_no');
-    
+
     try {
       const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/pass-preferences/vaaz-center', {
         method: 'PUT',
@@ -43,18 +43,18 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
           event_id: 2
         }]),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to update attendance response');
       }
-      
+
       // Success - update member attendance
       setMemberAttendance(prev => ({
         ...prev,
         [memberId]: vaazCenterId
       }));
-      
+
       const attendanceText = vaazCenterId === 3 ? 'Attending' : 'Not Attending';
       setMemberMessages(prev => ({
         ...prev,
@@ -62,7 +62,7 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
       }));
       clearMessageAfterTimeout(memberId);
       toast.success(`${attendanceText} response submitted successfully!`);
-      
+
     } catch (error) {
       console.error('Error submitting attendance response:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit attendance response';
@@ -110,39 +110,20 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
     // Or, display a specific message if currentUser is null when it shouldn't be.
     return <div>Loading user information or user not available...</div>;
   }
-  
+
   return (
     <>
       <h1 className="text-xl md:text-2xl font-semibold text-primary-green mb-4">Pehli Raat Survey</h1>
       <Card className="border-primary-green/20">
-        {/* <CardHeader>
-          <p className="text-sm text-gray-600 mt-2">
-            Mumineen with Raza for Colombo Relay Centre can choose their preferred Waaz Centre from two available options.
+        <CardHeader>
+          <p className="text-md text-gray-600 mt-2">
+            Pehli Raat Majlis & Jaman will be held at Mufaddal Centre (SLECC) - MCZ <br /> <a className='text-red-600' href="https://maps.app.goo.gl/f2BbymaMTefYwryN8" target="_blank" rel="noopener noreferrer">https://maps.app.goo.gl/f2BbymaMTefYwryN8</a>.
           </p>
-          <ul className='list-disc pl-6 text-sm text-gray-600'>
-            <li>Central Masjid Zone - CMZ</li>
-            <li>Mufaddal Centre - MCZ</li>
-          </ul>
-          <p className='text-sm text-gray-600 pt-2'>
-            <b>Instructions: </b>
-            <br />
-            Mumineen are encouraged to study the locality of both Centres by going to <a href="https://colombo-relay.asharamubaraka.net/waaz-centres/" target="_blank" rel="noopener noreferrer" className='text-red-600 break-all'>https://colombo-relay.asharamubaraka.net/waaz-centres/</a> before updating the survey
+          <p className='text-sm text-gray-600 pt-2 font-bold'>
+            Kindly update your attendance below.
           </p>
-          <ul className='text-sm text-gray-600 list-disc pl-6'>
-            <li>Selection is subject to availability of quota.</li>
-            <li>Once this survey is closed your preference cannot be changed.</li>
-          </ul>
-        </CardHeader> */}
+        </CardHeader>
         <CardContent className="pt-4">
-          <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-sm">
-            <div className="text-left">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">Pehli Raat Attendance</h2>
-              <p className="text-sm text-gray-600">
-                Please select the attendance status for each family member.
-              </p>
-            </div>
-          </div>
-          
           {/* Desktop Table View */}
           <div className="hidden md:block border rounded-lg overflow-hidden">
             {/* Table Header */}
@@ -191,14 +172,12 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
                           </div>
                         )}
                         {memberMessages[member.its_id] && (
-                          <div className={`flex items-center space-x-2 text-xs px-2 py-1 rounded ${
-                            memberMessages[member.its_id].type === 'success'
+                          <div className={`flex items-center space-x-2 text-xs px-2 py-1 rounded ${memberMessages[member.its_id].type === 'success'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${
-                              memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                            }`}></div>
+                            }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                              }`}></div>
                             <span>{memberMessages[member.its_id].message}</span>
                           </div>
                         )}
@@ -230,12 +209,12 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
                           </div>
                         )}
                       </div>
-                      
+
                       <div>
                         <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
                         <div className="text-base font-medium text-gray-900">{member.fullname}</div>
                       </div>
-                      
+
                       <div>
                         <div className="text-sm font-medium text-gray-500 mb-2">Attendance Status</div>
                         <div className="space-y-3">
@@ -253,14 +232,12 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
                             </SelectContent>
                           </Select>
                           {memberMessages[member.its_id] && (
-                            <div className={`flex items-center space-x-2 text-sm px-3 py-2 rounded-lg ${
-                              memberMessages[member.its_id].type === 'success'
+                            <div className={`flex items-center space-x-2 text-sm px-3 py-2 rounded-lg ${memberMessages[member.its_id].type === 'success'
                                 ? 'bg-green-100 text-green-800 border border-green-200'
                                 : 'bg-red-100 text-red-800 border border-red-200'
-                            }`}>
-                              <div className={`w-2 h-2 rounded-full ${
-                                memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
-                              }`}></div>
+                              }`}>
+                              <div className={`w-2 h-2 rounded-full ${memberMessages[member.its_id].type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                                }`}></div>
                               <span className="font-medium">{memberMessages[member.its_id].message}</span>
                             </div>
                           )}
@@ -275,4 +252,5 @@ export default function PehliRaatContent({ currentUser }: PehliRaatContentProps)
         </CardContent>
       </Card>
     </>
-)}
+  )
+}

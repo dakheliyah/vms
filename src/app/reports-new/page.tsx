@@ -366,7 +366,7 @@ export default function ReportsNewPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report {currentUser?.its_id}</h2>
+            <h2 className="text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report</h2>
             <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
               <label htmlFor="event-select" className="text-base font-semibold text-blue-800 whitespace-nowrap">Report Type:</label>
               <Select value={selectedEventId} onValueChange={setSelectedEventId}>

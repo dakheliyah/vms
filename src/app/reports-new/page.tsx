@@ -365,12 +365,12 @@ export default function ReportsNewPage() {
       {renderHeader()}
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report</h2>
-            <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
-              <label htmlFor="event-select" className="text-base font-semibold text-blue-800 whitespace-nowrap">Report Type:</label>
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 space-y-4 lg:space-y-0">
+            <h2 className="text-xl sm:text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-lg border-2 border-blue-200 shadow-sm w-full sm:w-auto">
+              <label htmlFor="event-select" className="text-sm sm:text-base font-semibold text-blue-800 whitespace-nowrap">Report Type:</label>
               <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-                <SelectTrigger className="w-56 h-12 bg-white border-2 border-blue-300 hover:border-blue-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-gray-800">
+                <SelectTrigger className="w-full sm:w-56 h-10 sm:h-12 bg-white border-2 border-blue-300 hover:border-blue-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-gray-800">
                   <SelectValue placeholder="Select report type" className="font-medium" />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-blue-200 shadow-xl">

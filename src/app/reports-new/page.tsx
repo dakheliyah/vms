@@ -63,6 +63,7 @@ export default function ReportsNewPage() {
   const [filterGender, setFilterGender] = useState('');
   const [filterVaazCenter, setFilterVaazCenter] = useState(''); // New filter state
   const [filterAge, setFilterAge] = useState('');
+  const [selectedEventId, setSelectedEventId] = useState('1'); // New state for event selection
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([
     'its_id', 'fullname', 'gender', 'age', 'country', 'jamaat', 'vaaz_center'
@@ -108,7 +109,7 @@ export default function ReportsNewPage() {
 
       try {
         // Add header token to this
-        const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/pass-preference/breakdown?event_id=1', {
+        const response = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/pass-preference/breakdown?event_id=${selectedEventId}`, {
             headers: {
                 'Token': user || '',
             }
@@ -140,7 +141,7 @@ export default function ReportsNewPage() {
     };
 
     fetchData();
-  }, []);
+  }, [selectedEventId]);
 
   const filteredData = useMemo(() => {
     return data
@@ -364,7 +365,21 @@ export default function ReportsNewPage() {
       {renderHeader()}
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-6 text-primary-green">Pass Preference Breakdown Report {currentUser?.its_id}</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report {currentUser?.its_id}</h2>
+            <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
+              <label htmlFor="event-select" className="text-base font-semibold text-blue-800 whitespace-nowrap">Report Type:</label>
+              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                <SelectTrigger className="w-56 h-12 bg-white border-2 border-blue-300 hover:border-blue-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-gray-800">
+                  <SelectValue placeholder="Select report type" className="font-medium" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-blue-200 shadow-xl">
+                  <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
+                  <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">

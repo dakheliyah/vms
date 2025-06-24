@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // For potential filters
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Download, RefreshCw } from 'lucide-react';
 import useCurrentUser from '@/lib/hooks/useCurrentUser'; // Re-using for consistency if user context is needed
 import Papa from 'papaparse';
 
@@ -68,6 +68,8 @@ export default function ReportsNewPage() {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([
     'its_id', 'fullname', 'gender', 'age', 'country', 'jamaat', 'vaaz_center'
   ]);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Consistent user fetching, though not directly used for data display yet
   const { user: currentUser, isLoading: userLoading, error: userError } = useCurrentUser();
@@ -99,49 +101,65 @@ export default function ReportsNewPage() {
     { key: 'updated_at', label: 'Updated At' }
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setIsRefreshing(true);
+    } else {
       setLoading(true);
-      setError(null);
+    }
+    setError(null);
 
-      // Get current user
-      const user = localStorage.getItem('its_no');
+    // Get current user
+    const user = localStorage.getItem('its_no');
 
-      try {
-        // Add header token to this
-        const response = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/pass-preference/breakdown?event_id=${selectedEventId}`, {
-            headers: {
-                'Token': user || '',
-            }
-        }); // Using relative path for API route
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-        const result = await response.json();
-        // Assuming the API returns an array of ReportData directly or has a data property
-        if (Array.isArray(result)) {
-            setData(result);
-        } else if (result && Array.isArray(result.data)) { // Common pattern for APIs to wrap data
-            setData(result.data);
-        } else {
-            console.warn('API response was not in the expected format:', result);
-            setData([]); // Set to empty if format is unexpected
-            // Optionally, set an error message here
-            // setError('Unexpected data format from API.');
-        }
-
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+    try {
+      // Add header token to this
+      const response = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/mumineen/pass-preference/breakdown?event_id=${selectedEventId}`, {
+          headers: {
+              'Token': user || '',
+          }
+      }); // Using relative path for API route
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
       }
-      setLoading(false);
-    };
+      const result = await response.json();
+      // Assuming the API returns an array of ReportData directly or has a data property
+      if (Array.isArray(result)) {
+          setData(result);
+      } else if (result && Array.isArray(result.data)) { // Common pattern for APIs to wrap data
+          setData(result.data);
+      } else {
+          console.warn('API response was not in the expected format:', result);
+          setData([]); // Set to empty if format is unexpected
+          // Optionally, set an error message here
+          // setError('Unexpected data format from API.');
+      }
+      
+      // Update last refreshed timestamp
+      setLastRefreshed(new Date());
 
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    }
+    
+    if (isManualRefresh) {
+      setIsRefreshing(false);
+    } else {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [selectedEventId]);
+
+  const handleRefresh = () => {
+    fetchData(true);
+  };
 
   const filteredData = useMemo(() => {
     return data
@@ -367,17 +385,35 @@ export default function ReportsNewPage() {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 space-y-4 lg:space-y-0">
             <h2 className="text-xl sm:text-2xl font-semibold text-primary-green">Pass Preference Breakdown Report</h2>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-lg border-2 border-blue-200 shadow-sm w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-lg border-2 border-blue-200 shadow-sm w-full sm:w-auto">
               <label htmlFor="event-select" className="text-sm sm:text-base font-semibold text-blue-800 whitespace-nowrap">Report Type:</label>
-              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-                <SelectTrigger className="w-full sm:w-56 h-10 sm:h-12 bg-white border-2 border-blue-300 hover:border-blue-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-gray-800">
-                  <SelectValue placeholder="Select report type" className="font-medium" />
-                </SelectTrigger>
-                <SelectContent className="border-2 border-blue-200 shadow-xl">
-                  <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
-                  <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                  <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                    <SelectTrigger className="w-full sm:w-56 h-10 sm:h-12 bg-white border-2 border-blue-300 hover:border-blue-500 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-gray-800">
+                      <SelectValue placeholder="Select report type" className="font-medium" />
+                    </SelectTrigger>
+                    <SelectContent className="border-2 border-blue-200 shadow-xl">
+                      <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
+                      <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={isRefreshing || loading}
+                    variant="outline"
+                    size="sm"
+                    className="h-10 sm:h-12 px-3 border-2 border-blue-300 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                {lastRefreshed && (
+                  <div className="text-xs sm:text-sm text-blue-600 font-medium whitespace-nowrap">
+                    Last updated: {lastRefreshed.toLocaleTimeString()}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           

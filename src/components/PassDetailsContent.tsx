@@ -568,7 +568,7 @@ export default function PassDetailsContent({ currentUser }: PassDetailsContentPr
                       
                       <div>
                         <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
-                        <div className="text-base font-medium text-gray-900">{member.fullname} ({member.gender})</div>
+                        <div className="text-base font-medium text-gray-900">{member.fullname}</div>
                       </div>
                       
                       <div>

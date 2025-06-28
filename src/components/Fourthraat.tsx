@@ -55,7 +55,9 @@ export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
         [memberId]: vaazCenterId
       }));
 
-      const attendanceText = vaazCenterId === 3 ? 'Attending' : 'Not Attending';
+      const attendanceText = vaazCenterId === 5 ? 'CMZ - Central Masjid Zone' : 
+                             vaazCenterId === 6 ? 'MCZ - Mufaddal Centre Zone' : 
+                             'Not Attending';
       setMemberMessages(prev => ({
         ...prev,
         [memberId]: { type: 'success', message: `${attendanceText} response submitted successfully!`, timestamp: Date.now() }

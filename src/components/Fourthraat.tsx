@@ -10,18 +10,80 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface VaazCenter {
+  id: number;
+  name: string;
+  est_capacity: number;
+  lat: string | null;
+  long: string | null;
+  created_at: string;
+  updated_at: string;
+  event_id: number;
+  male_capacity: number;
+  female_capacity: number;
+  event: {
+    id: number;
+    name: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    miqaat_id: number | null;
+  };
+}
+
 interface FourthRaatContentProps {
   currentUser: User | null; // Pass currentUser as a prop
 }
 
 export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
-  const { familyMembers, isLoading: isLoadingFamilyMembers, error: familyMembersError, refetch: refetchFamilyMembers } = useFamilyMembers(3);
+  const EVENT_ID = 3;
+  const { familyMembers, isLoading: isLoadingFamilyMembers, error: familyMembersError, refetch: refetchFamilyMembers } = useFamilyMembers(EVENT_ID);
   // Track attendance selection for family members (3 = attending, 4 = not attending)
   const [memberAttendance, setMemberAttendance] = useState<Record<number, number>>({});
   const [updatingMembers, setUpdatingMembers] = useState<Set<number>>(new Set()); // Track multiple updating members
 
   // Message states for success/error feedback
   const [memberMessages, setMemberMessages] = useState<Record<number, { type: 'success' | 'error'; message: string; timestamp: number }>>({});
+
+  // Vaaz centers state
+  const [vaazCenters, setVaazCenters] = useState<VaazCenter[]>([]);
+  const [isLoadingVaazCenters, setIsLoadingVaazCenters] = useState(true);
+  const [vaazCentersError, setVaazCentersError] = useState<string | null>(null);
+
+  // Fetch vaaz centers from API
+  const fetchVaazCenters = async () => {
+    const its_no = localStorage.getItem('its_no');
+    
+    try {
+      setIsLoadingVaazCenters(true);
+      setVaazCentersError(null);
+      
+      const response = await fetch(`https://vms-api-main-branch-zuipth.laravel.cloud/api/vaaz-center?event_id=${EVENT_ID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': its_no || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch vaaz centers');
+      }
+
+      const data: VaazCenter[] = await response.json();
+      setVaazCenters(data);
+    } catch (error) {
+      console.error('Error fetching vaaz centers:', error);
+      setVaazCentersError(error instanceof Error ? error.message : 'Failed to fetch vaaz centers');
+    } finally {
+      setIsLoadingVaazCenters(false);
+    }
+  };
+
+  // Load vaaz centers on component mount
+  useEffect(() => {
+    fetchVaazCenters();
+  }, []);
 
   // Handle attendance selection for family members
   const handleAttendanceChange = async (memberId: number, vaazCenterId: number) => {
@@ -55,9 +117,8 @@ export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
         [memberId]: vaazCenterId
       }));
 
-      const attendanceText = vaazCenterId === 5 ? 'CMZ - Central Masjid Zone' : 
-                             vaazCenterId === 6 ? 'MCZ - Mufaddal Centre Zone' : 
-                             'Not Attending';
+      const selectedCenter = vaazCenters.find(center => center.id === vaazCenterId);
+      const attendanceText = selectedCenter ? selectedCenter.name : 'Unknown Selection';
       setMemberMessages(prev => ({
         ...prev,
         [memberId]: { type: 'success', message: `${attendanceText} response submitted successfully!`, timestamp: Date.now() }
@@ -96,12 +157,16 @@ export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
   };
 
   // Handle loading and error states from the useFamilyMembers hook
-  if (isLoadingFamilyMembers) {
-    return <div>Loading family member details...</div>;
+  if (isLoadingFamilyMembers || isLoadingVaazCenters) {
+    return <div>Loading family member details and attendance options...</div>;
   }
 
   if (familyMembersError) {
     return <div>Error loading family details: {familyMembersError}. <Button onClick={refetchFamilyMembers}>Try again</Button></div>;
+  }
+
+  if (vaazCentersError) {
+    return <div>Error loading attendance options: {vaazCentersError}. <Button onClick={fetchVaazCenters}>Try again</Button></div>;
   }
 
 
@@ -163,9 +228,17 @@ export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
                             <SelectValue placeholder="Select attendance status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="5">CMZ - Central Masjid Zone</SelectItem>
-                            <SelectItem value="6">MCZ - Mufaddal Centre Zone</SelectItem>
-                            <SelectItem value="7">Not Attending</SelectItem>
+                            {isLoadingVaazCenters ? (
+                              <SelectItem value="" disabled>Loading options...</SelectItem>
+                            ) : vaazCentersError ? (
+                              <SelectItem value="" disabled>Error loading options</SelectItem>
+                            ) : (
+                              vaazCenters.map((center) => (
+                                <SelectItem key={center.id} value={center.id.toString()}>
+                                  {center.name}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                         {isUpdatingThisMember && (
@@ -230,9 +303,17 @@ export default function FourthRaat({ currentUser }: FourthRaatContentProps) {
                               <SelectValue placeholder="Select attendance status" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="5">CMZ - Central Masjid Zone</SelectItem>
-                              <SelectItem value="6">MCZ - Mufaddal Centre Zone</SelectItem>
-                              <SelectItem value="7">Not Attending</SelectItem>
+                              {isLoadingVaazCenters ? (
+                                <SelectItem value="" disabled>Loading options...</SelectItem>
+                              ) : vaazCentersError ? (
+                                <SelectItem value="" disabled>Error loading options</SelectItem>
+                              ) : (
+                                vaazCenters.map((center) => (
+                                  <SelectItem key={center.id} value={center.id.toString()}>
+                                    {center.name}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           {memberMessages[member.its_id] && (

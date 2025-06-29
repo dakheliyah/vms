@@ -9,17 +9,23 @@ interface UseFamilyMembersReturn {
   refetch: () => void;
 }
 
-const useFamilyMembers = (eventId: number = 1): UseFamilyMembersReturn => {
+const useFamilyMembers = (eventId: number | null): UseFamilyMembersReturn => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchFamilyMembers = useCallback(async () => {
+    if (!eventId) {
+      setFamilyMembers([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     const its_no = localStorage.getItem('its_no');
     if (!its_no) {
       console.error('ITS number not found in localStorage');
+      setIsLoading(false);
       return;
     }
     // TODO: Replace '/family-members' with the actual endpoint from the VMS API documentation

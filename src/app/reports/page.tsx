@@ -459,6 +459,7 @@ export default function ReportsPage() {
                       <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
                       <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
                       <SelectItem value="3" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Fourth Raat Reports</SelectItem>
+                      <SelectItem value="4" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Fifth Raat Reports</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button

@@ -21,7 +21,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  X
+  X,
+  Plus
 } from 'lucide-react';
 import useCurrentUser from '@/lib/hooks/useCurrentUser';
 import Link from 'next/link';
@@ -46,6 +47,20 @@ export default function AdminPage() {
   // Import users states
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // New Event modal states
+  const [showNewEventModal, setShowNewEventModal] = useState(false);
+  const [newEventName, setNewEventName] = useState('');
+  const [newEventStatus, setNewEventStatus] = useState<'active' | 'inactive'>('active');
+
+  // New Vaaz Center modal states
+  const [showNewVaazCenterModal, setShowNewVaazCenterModal] = useState(false);
+  const [newVaazCenterName, setNewVaazCenterName] = useState('');
+  const [newVaazCenterEstCapacity, setNewVaazCenterEstCapacity] = useState('');
+  const [newVaazCenterEventId, setNewVaazCenterEventId] = useState('');
+  const [newVaazCenterMaleCapacity, setNewVaazCenterMaleCapacity] = useState('');
+  const [newVaazCenterFemaleCapacity, setNewVaazCenterFemaleCapacity] = useState('');
+  const [events, setEvents] = useState<Array<{id: number, name: string, status: string}>>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -300,6 +315,147 @@ export default function AdminPage() {
     document.body.removeChild(link);
   };
 
+  // Fetch events for dropdown
+  const fetchEvents = async () => {
+    try {
+      const its_no = localStorage.getItem('its_no');
+      const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/events', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': `${its_no}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+
+      const eventsData = await response.json();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  // Handle new event submission
+  const handleNewEventSubmit = async () => {
+    if (!newEventName.trim()) {
+      alert('Please enter an event name');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const its_no = localStorage.getItem('its_no');
+      const payload = {
+        name: newEventName.trim(),
+        status: newEventStatus
+      };
+
+      const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': `${its_no}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('New event created:', result);
+      
+      // Reset form and close modal
+      setNewEventName('');
+      setNewEventStatus('active');
+      setShowNewEventModal(false);
+      
+      alert('Event created successfully!');
+      
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Error creating event. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle new vaaz center submission
+  const handleNewVaazCenterSubmit = async () => {
+    if (!newVaazCenterName.trim()) {
+      alert('Please enter a vaaz center name');
+      return;
+    }
+    if (!newVaazCenterEstCapacity || isNaN(Number(newVaazCenterEstCapacity))) {
+      alert('Please enter a valid estimated capacity');
+      return;
+    }
+    if (!newVaazCenterEventId) {
+      alert('Please select an event');
+      return;
+    }
+    if (!newVaazCenterMaleCapacity || isNaN(Number(newVaazCenterMaleCapacity))) {
+      alert('Please enter a valid male capacity');
+      return;
+    }
+    if (!newVaazCenterFemaleCapacity || isNaN(Number(newVaazCenterFemaleCapacity))) {
+      alert('Please enter a valid female capacity');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const its_no = localStorage.getItem('its_no');
+      const payload = {
+        name: newVaazCenterName.trim(),
+        est_capacity: Number(newVaazCenterEstCapacity),
+        male_capacity: Number(newVaazCenterMaleCapacity),
+        female_capacity: Number(newVaazCenterFemaleCapacity),
+        lat: 0,
+        long: 0,
+        event_id: Number(newVaazCenterEventId)
+      };
+
+      const response = await fetch('https://vms-api-main-branch-zuipth.laravel.cloud/api/vaaz-center', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Token': `${its_no}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('New vaaz center created:', result);
+      
+      // Reset form and close modal
+      setNewVaazCenterName('');
+      setNewVaazCenterEstCapacity('');
+      setNewVaazCenterEventId('');
+      setNewVaazCenterMaleCapacity('');
+      setNewVaazCenterFemaleCapacity('');
+      setShowNewVaazCenterModal(false);
+      
+      alert('Vaaz center created successfully!');
+      
+    } catch (error) {
+      console.error('Error creating vaaz center:', error);
+      alert('Error creating vaaz center. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -367,7 +523,7 @@ export default function AdminPage() {
         </div>
 
         {/* Enhanced Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <Card className="bg-gradient-to-br from-[#FFF6E7] to-[#EBE3D6] border-[#D9C9AD] shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader className="pb-6">
               <CardTitle className="flex items-center text-2xl font-bold">
@@ -449,6 +605,49 @@ export default function AdminPage() {
                   </div>
                   <div className="text-center">
                     <div className="font-semibold text-xs">Export Data</div>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#FFF6E7] to-[#EBE3D6] border-[#D9C9AD] shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center text-2xl font-bold">
+                <div className="p-3 bg-[#23476B] rounded-lg mr-4">
+                  <Settings className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="text-[#23476B]">Admin Operations</div>
+                  <div className="text-sm font-normal text-[#23476B]/70 mt-1">Manage events and vaaz centers</div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Button 
+                  className="justify-center h-20 text-sm bg-white hover:bg-[#FFF6E7] text-[#23476B] border-[#D9C9AD] shadow-sm flex-col"
+                  onClick={() => setShowNewEventModal(true)}
+                >
+                  <div className="p-2 bg-[#D9C9AD] rounded-lg mb-2">
+                    <Plus className="w-5 h-5 text-[#23476B]" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-xs">Add New Event</div>
+                  </div>
+                </Button>
+                <Button 
+                  className="justify-center h-20 text-sm bg-white hover:bg-[#FFF6E7] text-[#23476B] border-[#D9C9AD] shadow-sm flex-col"
+                  onClick={() => {
+                    setShowNewVaazCenterModal(true);
+                    fetchEvents();
+                  }}
+                >
+                  <div className="p-2 bg-[#D9C9AD] rounded-lg mb-2">
+                    <Plus className="w-5 h-5 text-[#23476B]" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-xs">Add New Vaaz Center</div>
                   </div>
                 </Button>
               </div>
@@ -880,6 +1079,232 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   'Import Users'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Event Modal */}
+      {showNewEventModal && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">Add New Event</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowNewEventModal(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={newEventName}
+                  onChange={(e) => setNewEventName(e.target.value)}
+                  placeholder="Enter event name"
+                  disabled={isSubmitting}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Status <span className="text-red-500">*</span>
+                </label>
+                <Select 
+                  value={newEventStatus} 
+                  onValueChange={(value: 'active' | 'inactive') => setNewEventStatus(value)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">
+                      <div className="flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                        Active
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="inactive">
+                      <div className="flex items-center">
+                        <XCircle className="w-4 h-4 mr-2 text-red-500" />
+                        Inactive
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+              <Button
+                variant="outline"
+                onClick={() => setShowNewEventModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleNewEventSubmit}
+                disabled={isSubmitting || !newEventName.trim()}
+                className="min-w-[100px]"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  'Create Event'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Vaaz Center Modal */}
+      {showNewVaazCenterModal && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">Add New Vaaz Center</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowNewVaazCenterModal(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={newVaazCenterName}
+                  onChange={(e) => setNewVaazCenterName(e.target.value)}
+                  placeholder="Enter vaaz center name"
+                  disabled={isSubmitting}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Est Capacity <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  value={newVaazCenterEstCapacity}
+                  onChange={(e) => setNewVaazCenterEstCapacity(e.target.value)}
+                  placeholder="Enter estimated capacity"
+                  disabled={isSubmitting}
+                  className="w-full"
+                  min="1"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Event <span className="text-red-500">*</span>
+                </label>
+                <Select 
+                  value={newVaazCenterEventId} 
+                  onValueChange={setNewVaazCenterEventId}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {events.map((event) => (
+                      <SelectItem key={event.id} value={event.id.toString()}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{event.name}</span>
+                          <Badge 
+                            variant={event.status === 'active' ? 'default' : 'secondary'}
+                            className="ml-2"
+                          >
+                            {event.status}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Male Capacity <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  value={newVaazCenterMaleCapacity}
+                  onChange={(e) => setNewVaazCenterMaleCapacity(e.target.value)}
+                  placeholder="Enter male capacity"
+                  disabled={isSubmitting}
+                  className="w-full"
+                  min="0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Female Capacity <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="number"
+                  value={newVaazCenterFemaleCapacity}
+                  onChange={(e) => setNewVaazCenterFemaleCapacity(e.target.value)}
+                  placeholder="Enter female capacity"
+                  disabled={isSubmitting}
+                  className="w-full"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+              <Button
+                variant="outline"
+                onClick={() => setShowNewVaazCenterModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleNewVaazCenterSubmit}
+                disabled={isSubmitting || !newVaazCenterName.trim() || !newVaazCenterEstCapacity || !newVaazCenterEventId || !newVaazCenterMaleCapacity || !newVaazCenterFemaleCapacity}
+                className="min-w-[100px]"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  'Create Vaaz Center'
                 )}
               </Button>
             </div>

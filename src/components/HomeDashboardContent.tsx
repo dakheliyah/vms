@@ -15,7 +15,7 @@ export default function HomeDashboardContent({ currentUser }: HomeDashboardConte
   // TODO: The useFamilyMembers hook currently doesn't take any parameters like currentUser.its_id.
   // It needs to be modified or a new hook created if family members are specific to the currentUser.
   // For now, assuming useFamilyMembers fetches all relevant family members or is context-aware.
-  const { familyMembers, isLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers();
+  const { familyMembers, isLoading, error: familyError, refetch: refetchFamilyMembers } = useFamilyMembers(1);
 
   useEffect(() => {
     // If fetching family members depends on currentUser, trigger refetch when currentUser is available

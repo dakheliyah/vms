@@ -75,7 +75,7 @@ export default function ReportsPage() {
   ]);
   
   // Common states
-  const [selectedEventId, setSelectedEventId] = useState('1');
+  const [selectedEventId, setSelectedEventId] = useState('4');
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -456,10 +456,10 @@ export default function ReportsPage() {
                       <SelectValue placeholder="Select report type" className="font-medium" />
                     </SelectTrigger>
                     <SelectContent className="border-2 border-blue-200 shadow-xl">
-                      <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
-                      <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
-                      <SelectItem value="3" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Fourth Raat Reports</SelectItem>
                       <SelectItem value="4" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Fifth Raat Reports</SelectItem>
+                      <SelectItem value="3" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Fourth Raat Reports</SelectItem>
+                      <SelectItem value="2" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">🌙 Pehli Raat Reports</SelectItem>
+                      <SelectItem value="1" className="font-medium hover:bg-blue-50 focus:bg-blue-100 py-3">📊 Waaz Reports</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button

@@ -15,7 +15,7 @@ interface PassDetailsContentProps {
 }
 
 export default function PassDetailsContent({ currentUser }: PassDetailsContentProps) {
-  const { familyMembers, isLoading: isLoadingFamilyMembers, error: familyMembersError, refetch: refetchFamilyMembers } = useFamilyMembers();
+  const { familyMembers, isLoading: isLoadingFamilyMembers, error: familyMembersError, refetch: refetchFamilyMembers } = useFamilyMembers(1);
   // SelectedMembers is not used for selection actions here, but kept if other logic depends on it.
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]); 
   const [passPreferencesData, setPassPreferencesData] = useState<PassPreference[]>([]);
